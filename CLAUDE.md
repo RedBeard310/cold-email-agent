@@ -34,6 +34,23 @@ finance-lead-finder ──► Airtable (per-niche base) ──► THIS AGENT ─
 - **Upstream:** [finance-lead-finder](../finance-lead-finder/) produces the financial-advisor lead list into Airtable base `appvEVgfYvyNIms2h`. Each future niche gets its own upstream repo + own base.
 - **Downstream:** the existing SmartLead account, inboxes, and warmup — no new account.
 
+## Inbox health gate — shared SmartLead inboxes (lives in `youtube-email-outreach-v1`)
+
+This agent sends through the **same SmartLead account, inboxes, and warmup** as the rest of the ecosystem (see Integration points above / SPEC §6). Those inboxes are protected by an **inbox health gate** that already exists in the sibling repo `youtube-email-outreach-v1`. Since 2026-06-16 the gate reads per-mailbox warmup health from **InboxKit** and pauses/resumes the matching SmartLead inbox via `is_suspended`. Pause rules: health_score < 90, OR warmup day < 14, OR landing rate < 90 once an inbox has real volume. It runs at most once per 24h (staleness-gated) and never blocks sending if it errors.
+
+**Why this matters here even though this repo doesn't own the gate:** suspension happens at the **SmartLead account level**, so the protection is shared automatically. SmartLead will not send from a gate-paused inbox no matter which agent loaded the leads. So as long as the gate has run recently, this agent only ever sends from properly-warmed, healthy inboxes — which is exactly the requirement.
+
+**This is the one sanctioned reference to `youtube-email-outreach-v1`.** SPEC §9 / "Hard constraints" forbids drawing on the YouTube-creator repos — that rule is about **copy, audience, and skills**, which stay off-limits. The inbox health gate is **shared SmartLead/InboxKit infrastructure**, not copy. Don't import its code; just let it do its job and keep its state fresh.
+
+Rules for this repo:
+
+- **Don't suspend/resume SmartLead inboxes from here.** That lever is owned by the gate (and its `.inbox-health-state.json` in `youtube-email-outreach-v1`). Flipping `is_suspended` from this agent would fight it — the gate re-pauses inboxes you resume and won't auto-resume ones it didn't pause.
+- **Send capacity floats automatically.** The set of live inboxes changes as warmup health rises and falls. Expected, not a bug. Don't hardcode an inbox count or assume a fixed sending pool.
+- **Keep the gate fresh around a send batch.** A local SessionStart hook (in this repo's gitignored `.claude/settings.local.json`) runs the gate when you open this repo, so health is refreshed at your usual entry point. When you build the send path, also refresh it right before pushing: shell out to `cd /Users/caseybrown/Claude/youtube-email-outreach-v1 && npm run inbox-health` (staleness-gated, so it's a cheap no-op when already fresh). Don't reimplement the gate.
+- **Manual check (changes nothing):** `cd /Users/caseybrown/Claude/youtube-email-outreach-v1 && npm run inbox-health -- --status`.
+
+**Recommendation (not done — flagging for Casey):** two send-side agents now depend on a gate that physically lives inside one of them. The clean long-term move is to extract the gate into a shared location (its own small repo, or an `env-storage`-adjacent util) so neither send agent "owns" it. Until then the coupling above is the pragmatic path — documented so it's deliberate, not accidental.
+
 ## Secrets
 
 All secrets come from the **shared `env-storage` repo**, not a local `.env` (consistent with sibling projects):
