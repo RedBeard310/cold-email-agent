@@ -1,0 +1,13 @@
+# Dependencies
+node_modules/
+
+# Secrets (this repo reads from the shared env-storage/.env; never commit a local one)
+.env
+.env.local
+
+# Build output
+dist/
+
+# OS / editor
+.DS_Store
+*.log
