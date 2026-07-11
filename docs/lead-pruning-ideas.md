@@ -78,5 +78,17 @@ dead/parked spike far above ~8% as environmental (local network exhaustion) unti
 - **2026-07-10 (later)** — marketing + advisors bases pruned (14,713 homepages read):
   marketing 12,293 → **10,838** (1,450 same-firm extras + 5 parked deleted, 30 first names
   fixed); advisors 7,815 → **7,813** (2 parked deleted, 9 first names fixed; 3,611 same-firm
-  contacts KEPT per the keep-all-contacts decision). Flags for eventual review in
-  `consulti-review-2026-07-11.csv`: 188 unreachable, 158 placeholder sites.
+  contacts KEPT per the keep-all-contacts decision).
+- **2026-07-11** — niche 7 **staffing & recruiting** loaded (pull 3,000 → clean approved
+  2,562 (85.4%) → base `appi362RoZ7vi2Hsd`) and full seven-base prune applied (27,301
+  homepages read): staffing 2,562 → **2,411** (149 same-firm extras + 2 parked); marketing
+  10,838 → **10,833** (5 people found in BOTH marketing and consulting bases — removed from
+  marketing, consulting keeps them per first-niche-wins); 39 more first-name fixes across all
+  bases (the seven-base cohort dictionary confirms more email-name tokens than per-base runs
+  did). Flags: `consulti-review-2026-07-11-2.csv` (604 — placeholder/unreachable/keyword-miss;
+  keyword-miss again surfacing misfiled-but-real firms, e.g. law firms in the accounting and
+  health bases). **Incident + fix:** archive filenames were date-stamped only, so this day's
+  first re-run silently overwrote the 2026-07-10-evening archive (1,457 rows) and review CSV.
+  Archives now uniquify with `-2/-3` suffixes; the lost removal archive was reconstructed
+  (1,442/1,457 rows, 99%) from Apollo/Consulti source CSVs diffed against the live bases →
+  `consulti-pruned-2026-07-11-reconstructed.csv`; the lost flags fully regenerate on any run.
