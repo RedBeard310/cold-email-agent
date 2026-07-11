@@ -74,4 +74,9 @@ dead/parked spike far above ~8% as environmental (local network exhaustion) unti
 - **2026-07-10** — four new niche bases pruned: 425 removed (387 dup-domain, 30
   homepage-verified off-vertical, 7 parked, 1 role-email) → legal 2,592 · accounting 2,521 ·
   health 2,547 · consulting 2,539. Archives: `consulti-pruned-2026-07-10.csv`; unresolved
-  flags: `consulti-review-2026-07-10.csv`.
+  flags: `consulti-review-2026-07-10.csv`. Plus 23 first-name fixes across the four bases.
+- **2026-07-10 (later)** — marketing + advisors bases pruned (14,713 homepages read):
+  marketing 12,293 → **10,838** (1,450 same-firm extras + 5 parked deleted, 30 first names
+  fixed); advisors 7,815 → **7,813** (2 parked deleted, 9 first names fixed; 3,611 same-firm
+  contacts KEPT per the keep-all-contacts decision). Flags for eventual review in
+  `consulti-review-2026-07-11.csv`: 188 unreachable, 158 placeholder sites.
