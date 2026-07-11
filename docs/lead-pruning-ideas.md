@@ -16,7 +16,7 @@ domain-level grouping and homepage judgment.
 |---|---|---|
 | Role-based emails (`info@`, `office@`, `appointments@`…) | remove | Gatekeeper inboxes; ZeroBounce marks them do_not_mail anyway — removing early saves verification credits |
 | Disposable email domains | remove | mailinator etc. |
-| One contact per company domain | remove extras | Partners at the same firm compare notes; keeps the strongest title (owner/founder > president/principal > rest). BD-shared domains and `segment=bd_affiliated` advisor rows are exempt |
+| One contact per company domain | remove extras | Partners at the same firm compare notes; keeps the strongest title (owner/founder > president/principal > rest). BD-shared domains and `segment=bd_affiliated` advisor rows are exempt. **Advisors niche: check is OFF entirely** (Casey, 2026-07-10) — the offer is a per-advisor channel and the mid-size RIA thesis wants several advisors per firm: "the more shots you take, the more baskets you can sink" |
 | Cross-niche email collision | remove from later base | Same person loaded into two niche bases would get two different pitches |
 | Cross-niche domain collision | flag | Different people at the same company in two bases — human call |
 | Parked / for-sale domains | remove | Responds 200 so the dead-site check passes it; content pass reads the page |
