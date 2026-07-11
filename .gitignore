@@ -8,9 +8,22 @@ node_modules/
 # Build output
 dist/
 
+# Dry-run plans (contain real lead data)
+.dryrun/
+
+# Infra provisioning output (domain lists, provider maps, DNS plans)
+.infra/
+
+# Apollo exports — id caches + enriched lead CSVs (contain real lead data)
+.apollo/
+
+# Consulti pulls — cursor state + raw lead CSVs (contain real lead data)
+.consulti/
+
 # OS / editor
 .DS_Store
 *.log
 
 # Local Claude Code settings (personal/machine-specific, e.g. the inbox-health SessionStart hook)
 .claude/settings.local.json
+consulti-*.csv

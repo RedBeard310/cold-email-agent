@@ -1,0 +1,24 @@
+{
+  "name": "cold-email-agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Generalist send-side cold-email outreach agent: Airtable leads -> SmartLead campaigns, niche-agnostic engine + pluggable niche configs.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "cea": "tsx src/cli.ts",
+    "preview": "tsx src/cli.ts preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
+}
