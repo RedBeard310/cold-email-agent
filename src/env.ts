@@ -2,7 +2,11 @@
 import { config } from 'dotenv';
 import { z } from 'zod';
 
-config({ path: '/Users/caseybrown/Claude/env-storage/.env' });
+// Machine-portable: Mac master first, then the VPS-derived copy. dotenv skips
+// missing files and never overrides vars already set in the environment.
+for (const p of ['/Users/caseybrown/Claude/env-storage/.env', '/home/casey/env-storage/.env']) {
+  config({ path: p });
+}
 
 export const env = z
   .object({
