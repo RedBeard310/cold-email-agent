@@ -51,6 +51,15 @@ Rules for this repo:
 
 **Recommendation (not done — flagging for Casey):** two send-side agents now depend on a gate that physically lives inside one of them. The clean long-term move is to extract the gate into a shared location (its own small repo, or an `env-storage`-adjacent util) so neither send agent "owns" it. Until then the coupling above is the pragmatic path — documented so it's deliberate, not accidental.
 
+## Campaign hard rules (2026-07-13 incident — do not regress)
+
+On 2026-07-13 we discovered every ACTIVE campaign (all 3 FA + all 10 Dream 100) was silently sending from only **12 legacy inboxes at 25 new leads/day**, because `create`/`attach-inboxes` mirrored the old Dream 100 campaign's settings and inbox pool — the 120-inbox fleet sat unused. These rules are enforced by `npm run cea -- fleet:audit --fix` ([src/engine/fleet.ts](src/engine/fleet.ts)), which also runs staleness-gated (12h) from the SessionStart hook in `.claude/settings.local.json`:
+
+1. **Every ACTIVE campaign gets the FULL account inbox pool attached** — never a subset, never a mirror of another campaign's pool. The inbox health gate (account-level `is_suspended`) decides which inboxes actually send; attaching suspended/warming inboxes is safe and means they auto-join every campaign the moment the gate releases them. (Note: SmartLead's `GET /email-accounts` list does NOT return `is_suspended` — don't conclude "nothing is paused" from it; the gate's `--status` output is ground truth.)
+2. **`max_new_leads_per_day` is always 99,999** (effectively uncapped — SmartLead accepts it). Throughput is governed by per-inbox `message_per_day` limits and the health gate — the right layers — never by a campaign-level lead cap.
+3. **New campaigns must pass `fleet:audit` before `start`.** `attach-inboxes` and `mirrorSettings` in [src/cli.ts](src/cli.ts) now comply (full pool + uncapped); don't reintroduce mirroring of caps or inbox subsets.
+4. SmartLead campaign status `COMPLETED` means the campaign finished every lead's sequence (all leads `COMPLETED`/`BLOCKED`, nothing pending). Terminal but reversible — adding leads reactivates it.
+
 ## Secrets
 
 All secrets come from the **shared `env-storage` repo**, not a local `.env` (consistent with sibling projects):

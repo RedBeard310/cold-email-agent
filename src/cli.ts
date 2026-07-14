@@ -100,7 +100,9 @@ async function mirrorSettings() {
     start_hour: cron.startHour ?? '09:00',
     end_hour: cron.endHour ?? '15:00',
     min_time_btw_emails: m.min_time_btwn_emails ?? 12,
-    max_new_leads_per_day: m.max_leads_per_day ?? 25,
+    // HARD RULE (2026-07-13): never mirror the mirror-campaign's daily lead cap. Caps are
+    // effectively unlimited; per-inbox limits + the inbox health gate govern throughput.
+    max_new_leads_per_day: 99_999,
   };
   const settings = {
     track_settings: m.track_settings ?? ['DONT_EMAIL_OPEN', 'DONT_LINK_CLICK'],
@@ -254,10 +256,13 @@ async function create(config: NicheConfig, opts: { limit: number | null }): Prom
 
 async function attachInboxes(config: NicheConfig): Promise<void> {
   const sl = await import('./engine/smartlead');
-  console.log(`\n=== ${config.niche}: ATTACH INBOXES — mirror D100 #${MIRROR_CAMPAIGN_ID}, stay DRAFTED ===\n`);
-  const source = await sl.listCampaignEmailAccounts(MIRROR_CAMPAIGN_ID);
+  // HARD RULE (2026-07-13): attach the FULL account pool, never a mirror campaign's subset.
+  // The inbox health gate (account-level is_suspended) decides which inboxes actually send.
+  const { listAllEmailAccounts } = await import('./engine/fleet');
+  console.log(`\n=== ${config.niche}: ATTACH INBOXES — full account pool, stay DRAFTED ===\n`);
+  const source = await listAllEmailAccounts();
   const ids = source.map((a) => a.id);
-  console.log(`Source inbox pool from D100: ${ids.length} inboxes (gate suspends unhealthy ones at send time)\n`);
+  console.log(`Full account inbox pool: ${ids.length} inboxes (gate suspends unhealthy ones at send time)\n`);
 
   for (const seq of config.sequences) {
     const name = `${config.campaignPrefix}${seq.name}`;
@@ -470,6 +475,11 @@ switch (cmd) {
   case 'attach-inboxes':
     await attachInboxes(financialAdvisors);
     break;
+  case 'fleet:audit': {
+    const { fleetAudit } = await import('./engine/fleet');
+    await fleetAudit({ fix: rest.includes('--fix'), ifStale: rest.includes('--if-stale') });
+    break;
+  }
   case 'start':
     await startSequence(financialAdvisors, Number(rest[0] ?? '0'));
     break;
@@ -692,7 +702,7 @@ switch (cmd) {
 
   default:
     console.log(
-      'usage: npm run cea -- <preview | dry-run | create [--limit N | --full] | attach-inboxes | start <seqN> | free-credits [--delete] | clean-caps [--apply] [--limit N]\n' +
+      'usage: npm run cea -- <preview | dry-run | create [--limit N | --full] | attach-inboxes | fleet:audit [--fix] [--if-stale] | start <seqN> | free-credits [--delete] | clean-caps [--apply] [--limit N]\n' +
         '                       | infra:domains [--count N] | infra:connect --file <domains.txt> [--apply] | infra:nameservers --file <csv> [--apply] | infra:inboxes [--file <csv>] [--apply] | infra:dns --file <records.json> [--apply] | infra:workspaces\n' +
         '                       | apollo:count [search] | apollo:ids [search] [--refresh] [--passes N] | apollo:export [search] [--files M | --all] [--refresh] [--passes N] | apollo:parse-url "<url>"\n' +
         '                       | apollo:to-airtable [search] (--workspace <wspId> | --base <appId>) [--table Leads] [--base-name "..."]\n' +

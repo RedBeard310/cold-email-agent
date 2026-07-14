@@ -27,3 +27,4 @@ dist/
 # Local Claude Code settings (personal/machine-specific, e.g. the inbox-health SessionStart hook)
 .claude/settings.local.json
 consulti-*.csv
+.fleet-audit-state.json
