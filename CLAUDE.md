@@ -76,3 +76,21 @@ All secrets come from the **shared `env-storage` repo**, not a local `.env` (con
 ## Ecosystem conventions (house style — follow when adding code)
 
 This project sits among sibling repos under `/Users/caseybrown/Claude/`. The closest relative, [finance-lead-finder](../finance-lead-finder/), establishes the house style this repo should follow when code is added: **TypeScript/Node ESM** (`"type": "module"`, Node ≥20), run via **`tsx`** with a thin `src/cli.ts` dispatching subcommands, `tsc --noEmit` for typecheck, `dotenv` + `zod`, and **pluggable adapters in their own `src/` subfolders** (mirroring how niche configs should plug into the engine here). No build/test commands exist in *this* repo yet — do not invent them; add them as you build, matching that convention.
+
+## How to write replies to me
+
+Keep your replies short and sweet. Don't cut any necessary information or important details, but aim for brevity when explaining them.
+
+Lead with what changed and what it means for me — not what you did step by step.
+Plain language, no unnecessary technical jargon. Explain a term only if I need it
+to make a decision.
+
+Keep it short and spaced out: brief paragraphs, bold labels, a table when
+comparing two or more things. No walls of text, no filler openers.
+
+Include, briefly, anything that changes my picture of the work:
+- what you actually verified vs. assumed
+- anything surprising you found along the way
+- decisions I still need to make, as a short list at the end
+
+Cut everything else.
