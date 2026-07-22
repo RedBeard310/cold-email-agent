@@ -22,6 +22,14 @@ function key(): string {
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+/** HTTP error carrying the status code so callers can branch (e.g. 402 = out of credits). */
+export class ConsultiHttpError extends Error {
+  constructor(message: string, readonly status: number) {
+    super(message);
+  }
+}
+export class InsufficientCreditsError extends Error {}
+
 async function req<T>(path: string, body?: unknown, attempt = 0): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
     method: body === undefined ? 'GET' : 'POST',
@@ -30,11 +38,11 @@ async function req<T>(path: string, body?: unknown, attempt = 0): Promise<T> {
   });
   const text = await res.text();
   if (res.status === 429 || res.status >= 500) {
-    if (attempt >= 5) throw new Error(`Consulti ${path} -> ${res.status} after ${attempt} retries: ${text.slice(0, 300)}`);
+    if (attempt >= 5) throw new ConsultiHttpError(`Consulti ${path} -> ${res.status} after ${attempt} retries: ${text.slice(0, 300)}`, res.status);
     await sleep(Math.min(60_000, 2000 * 2 ** attempt));
     return req<T>(path, body, attempt + 1);
   }
-  if (!res.ok) throw new Error(`Consulti ${path} -> ${res.status}: ${text.slice(0, 300)}`);
+  if (!res.ok) throw new ConsultiHttpError(`Consulti ${path} -> ${res.status}: ${text.slice(0, 300)}`, res.status);
   return JSON.parse(text) as T;
 }
 
@@ -82,6 +90,32 @@ export async function searchLeads(
 export async function getCredits(): Promise<{ lead_credits: number; verification_credits: number }> {
   const r = await req<{ data: { lead_credits: number; verification_credits: number } }>('/credits');
   return r.data;
+}
+
+/** Result of POST /verify (1 verification credit per successful check). */
+export interface ConsultiVerifyResult {
+  status: string; // good | risky | bad | unknown
+  isCatchAll: boolean;
+  isRoleAccount: boolean;
+  isDisposable: boolean;
+}
+
+/** Verify one email with Consulti's verification engine. Throws InsufficientCreditsError on 402. */
+export async function verifyEmail(email: string): Promise<ConsultiVerifyResult> {
+  try {
+    const r = await req<{
+      data: { status?: string; is_catch_all?: boolean; is_role_account?: boolean; is_disposable?: boolean };
+    }>('/verify', { email });
+    return {
+      status: r.data.status ?? 'unknown',
+      isCatchAll: !!r.data.is_catch_all,
+      isRoleAccount: !!r.data.is_role_account,
+      isDisposable: !!r.data.is_disposable,
+    };
+  } catch (err) {
+    if (err instanceof ConsultiHttpError && err.status === 402) throw new InsufficientCreditsError(err.message);
+    throw err;
+  }
 }
 
 // ---------------- saved lead lists (all free) ----------------

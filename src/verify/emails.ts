@@ -21,8 +21,8 @@ const STATUS_CHOICES = [
   'valid', 'invalid', 'catch-all', 'unknown', 'spamtrap', 'abuse', 'do_not_mail',
   'not_checked', 'no_email',
 ] as const;
-const VERIFIED_DATE = 'email_verified_date';
-const SUB_STATUS = 'email_sub_status';
+export const VERIFIED_DATE = 'email_verified_date';
+export const SUB_STATUS = 'email_sub_status';
 
 const auth = () => ({ Authorization: `Bearer ${env.AIRTABLE_PAT}` });
 const jsonAuth = () => ({ ...auth(), 'Content-Type': 'application/json' });
@@ -43,7 +43,7 @@ async function getTableMeta(baseId: string, table: string): Promise<TableMeta> {
  *  not pre-created here — record writes use typecast:true, which auto-creates any missing singleSelect
  *  option on write. Idempotent. Returns the table id and whether the verified-date field exists
  *  afterwards. When apply=false, only reports what's missing without touching the schema. */
-async function ensureSchema(baseId: string, table: string, apply: boolean): Promise<{ tableId: string; dateReady: boolean }> {
+export async function ensureSchema(baseId: string, table: string, apply: boolean): Promise<{ tableId: string; dateReady: boolean }> {
   const t = await getTableMeta(baseId, table);
   const statusField = t.fields.find((f) => f.name === 'email_status');
   if (!statusField) throw new Error('email_status field not found — is this the right table?');
@@ -76,7 +76,7 @@ async function ensureSchema(baseId: string, table: string, apply: boolean): Prom
 
 /** PATCH records in place, 10/request, throttled under Airtable's 5 req/s. typecast=true so any
  *  status string still lands even if a choice slipped through ensureSchema. */
-async function writeUpdates(baseId: string, tableId: string, updates: { id: string; fields: Record<string, unknown> }[]): Promise<void> {
+export async function writeUpdates(baseId: string, tableId: string, updates: { id: string; fields: Record<string, unknown> }[]): Promise<void> {
   for (let i = 0; i < updates.length; i += 10) {
     const batch = updates.slice(i, i + 10);
     const res = await fetch(`${API}/${baseId}/${tableId}`, {
@@ -90,7 +90,7 @@ async function writeUpdates(baseId: string, tableId: string, updates: { id: stri
 const normEmail = (v: unknown): string => String(v ?? '').trim().toLowerCase();
 
 /** Run `fns` with at most `n` in flight at once. Preserves input order in the result array. */
-async function mapPool<T, R>(items: T[], n: number, fn: (item: T, i: number) => Promise<R>): Promise<R[]> {
+export async function mapPool<T, R>(items: T[], n: number, fn: (item: T, i: number) => Promise<R>): Promise<R[]> {
   const out: R[] = new Array(items.length);
   let next = 0;
   async function worker() {

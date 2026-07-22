@@ -5,9 +5,8 @@
 //                        (default 50). --full loads the whole segment. Never starts, never
 //                        attaches inboxes.
 
-import { financialAdvisors } from './niches/financial_advisors/config';
+import { NICHES } from './niches';
 import { expandSpintax, spintaxVariants } from './engine/spintax';
-import { titleCaseName } from './engine/normalize';
 import type { NicheConfig } from './engine/types';
 
 /** Campaign whose schedule/settings we mirror (a live Dream 100 campaign). */
@@ -32,10 +31,13 @@ const indent = (t: string, pad = '    ') => t.split('\n').map((l) => pad + l).jo
 
 function preview(config: NicheConfig): void {
   console.log(`\n=== ${config.niche}: campaign preview (offline, nothing sent) ===`);
-  const fb = config.fieldMap.first_name?.fallback ?? '';
-  console.log('\nFirst-name normalization (ALL-CAPS source -> what recipients see):');
-  for (const sample of ['RONALD', 'MARY ANN', "O'BRIEN", 'AJ', '']) {
-    console.log(`    "${sample}"`.padEnd(20) + `-> ${titleCaseName(sample) ?? `(blank -> "${fb}")`}`);
+  const nameEntry = config.fieldMap.first_name;
+  if (nameEntry?.transform) {
+    const fb = nameEntry.fallback ?? '';
+    console.log('\nFirst-name normalization (ALL-CAPS source -> what recipients see):');
+    for (const sample of ['RONALD', 'MARY ANN', "O'BRIEN", 'AJ', '']) {
+      console.log(`    "${sample}"`.padEnd(20) + `-> ${nameEntry.transform(sample) ?? `(blank -> "${fb}")`}`);
+    }
   }
   for (const seq of config.sequences) {
     console.log(`\n\n========== ${config.campaignPrefix}${seq.name} ==========`);
@@ -171,6 +173,12 @@ async function create(config: NicheConfig, opts: { limit: number | null }): Prom
   const sl = await import('./engine/smartlead');
   console.log(`\n=== ${config.niche}: CREATE (campaigns DRAFTED/paused — never started) ===\n`);
 
+  // Refuse to create campaigns from a paste-in scaffold that hasn't been filled with real copy.
+  if (config.sequences.some((s) => s.emails.some((e) => e.body.includes('[[PASTE') || (e.subject ?? '').includes('[[PASTE')))) {
+    console.log('✗ ABORT — copy still contains [[PASTE …]] placeholders. Paste the real sequences into the niche copy.ts first.');
+    process.exit(1);
+  }
+
   const { buckets, leads, stats } = await buildLeadPlan(config);
   console.log(`Mirroring schedule/settings from Dream 100 campaign #${MIRROR_CAMPAIGN_ID}…`);
   const { schedule, settings } = await mirrorSettings();
@@ -212,13 +220,18 @@ async function create(config: NicheConfig, opts: { limit: number | null }): Prom
     const seqLenOk = seqs.length === seq.emails.length;
     const delaysOk = eq(delays, seq.emails.map((e) => e.delayDays));
     const first = seqs.find((s) => s.seq_number === 1);
-    const spintaxOk = !!first?.email_body.includes('{{first_name}}') && !!first?.email_body.includes('|');
+    // Only expect what the source copy actually contains — copy without spintax or a
+    // first-name merge tag must not fail the structural check.
+    const srcBody = seq.emails[0]?.body ?? '';
+    const spintaxOk =
+      (!srcBody.includes('|') || !!first?.email_body.includes('|')) &&
+      (!srcBody.includes('{{first_name}}') || !!first?.email_body.includes('{{first_name}}'));
     const subjectOk = first?.subject === (seq.emails[0]?.subject ?? '');
 
     console.log(`  ${mark(scheduleOk)} schedule mirrors D100 (Mon–Thu 09:00–15:00, 12min, 25/day)`);
     console.log(`  ${mark(settingsOk)} tracking OFF + plain text + stop-on-reply`);
     console.log(`  ${mark(seqLenOk && delaysOk)} sequence: ${seqs.length} steps, delays ${JSON.stringify(delays)}`);
-    console.log(`  ${mark(spintaxOk)} spintax + {{first_name}} preserved in body`);
+    console.log(`  ${mark(spintaxOk)} spintax/merge tags preserved in body`);
     console.log(`  ${mark(subjectOk)} subject step 1 = "${first?.subject}"`);
 
     const structuralOk = scheduleOk && settingsOk && seqLenOk && delaysOk && spintaxOk && subjectOk;
@@ -277,18 +290,21 @@ async function attachInboxes(config: NicheConfig): Promise<void> {
 
 // ---------------- free lead credits: delete completed/no-reply/old leads ----------------
 
-/** Advisor campaigns — NEVER touched by the credit-freeing scan. */
+/** Niche campaigns — NEVER touched by the credit-freeing scan. Protected by campaign-name
+ *  prefix from the registry (auto-covers every future niche); the legacy advisor IDs stay as
+ *  belt-and-braces in case a campaign is ever renamed. */
 const ADVISOR_CAMPAIGN_IDS = new Set([3505750, 3505755, 3505756]);
+const isNicheCampaign = (name: string) => Object.values(NICHES).some((n) => name.startsWith(n.campaignPrefix));
 const GRACE_DAYS = 10; // sequence must have finished at least this long ago
 const DAY_MS = 86_400_000;
 
 async function freeCredits(doDelete: boolean): Promise<void> {
   const sl = await import('./engine/smartlead');
   console.log(`\n=== FREE CREDITS — ${doDelete ? 'DELETE MODE' : 'DRY RUN (nothing deleted)'} ===`);
-  console.log(`criteria: status=COMPLETED · no reply category · finished >= ${GRACE_DAYS} days ago · advisor campaigns excluded\n`);
+  console.log(`criteria: status=COMPLETED · no reply category · finished >= ${GRACE_DAYS} days ago · niche campaigns excluded\n`);
 
   const now = Date.now();
-  const campaigns = (await sl.listCampaigns()).filter((c) => !ADVISOR_CAMPAIGN_IDS.has(c.id));
+  const campaigns = (await sl.listCampaigns()).filter((c) => !ADVISOR_CAMPAIGN_IDS.has(c.id) && !isNicheCampaign(c.name));
   const toDelete: { cid: number; leadId: number }[] = [];
   let scanned = 0;
 
@@ -458,38 +474,55 @@ async function cleanCaps(config: NicheConfig, opts: { apply: boolean; limit: num
 // ---------------- dispatch ----------------
 
 const [cmd, ...rest] = process.argv.slice(2);
+
+/** Resolve --niche <name> from the registry (default: financial_advisors, backward compat). */
+function activeNiche(args: string[]): NicheConfig {
+  const i = args.indexOf('--niche');
+  const key = i >= 0 ? args[i + 1] ?? '' : 'financial_advisors';
+  const config = NICHES[key];
+  if (!config) {
+    console.log(`unknown niche "${key}" — known: ${Object.keys(NICHES).join(', ')}`);
+    process.exit(1);
+  }
+  return config;
+}
+
 switch (cmd) {
   case 'preview':
-    preview(financialAdvisors);
+    preview(activeNiche(rest));
     break;
   case 'dry-run':
-    await dryRun(financialAdvisors);
+    await dryRun(activeNiche(rest));
     break;
   case 'create': {
     const full = rest.includes('--full');
     const li = rest.indexOf('--limit');
     const limit = full ? null : li >= 0 ? Number(rest[li + 1]) : 50;
-    await create(financialAdvisors, { limit });
+    await create(activeNiche(rest), { limit });
     break;
   }
   case 'attach-inboxes':
-    await attachInboxes(financialAdvisors);
+    await attachInboxes(activeNiche(rest));
     break;
   case 'fleet:audit': {
     const { fleetAudit } = await import('./engine/fleet');
     await fleetAudit({ fix: rest.includes('--fix'), ifStale: rest.includes('--if-stale') });
     break;
   }
-  case 'start':
-    await startSequence(financialAdvisors, Number(rest[0] ?? '0'));
+  case 'start': {
+    // Positional seq number, ignoring flags (e.g. `start --niche marketing_agencies 2`).
+    const pos = rest.filter((t, i) => !t.startsWith('--') && rest[i - 1] !== '--niche');
+    await startSequence(activeNiche(rest), Number(pos[0] ?? '0'));
     break;
+  }
   case 'free-credits':
     await freeCredits(rest.includes('--delete'));
     break;
   case 'clean-caps': {
     const li = rest.indexOf('--limit');
     const limit = li >= 0 ? Number(rest[li + 1]) : null;
-    await cleanCaps(financialAdvisors, { apply: rest.includes('--apply'), limit });
+    // FA-only on purpose: CLEAN_FIELDS names FA Airtable fields that don't exist in other bases.
+    await cleanCaps(NICHES['financial_advisors']!, { apply: rest.includes('--apply'), limit });
     break;
   }
 
@@ -624,6 +657,20 @@ switch (cmd) {
     await credits();
     break;
   }
+  case 'consulti:verify': {
+    const { consultiVerify } = await import('./consulti/verify');
+    const opt = (flag: string) => { const i = rest.indexOf(flag); return i >= 0 ? rest[i + 1] : undefined; };
+    const lim = opt('--limit');
+    const conc = opt('--concurrency');
+    await consultiVerify({
+      baseId: opt('--base') ?? 'appGzk9z2io4dPJUB',
+      table: opt('--table') ?? 'Leads',
+      apply: rest.includes('--apply'),
+      limit: lim != null ? Number(lim) : null,
+      concurrency: conc != null ? Number(conc) : 5,
+    });
+    break;
+  }
   case 'consulti:pull': {
     const { pull } = await import('./consulti/pull');
     const { SEARCHES } = await import('./consulti/searches');
@@ -702,13 +749,14 @@ switch (cmd) {
 
   default:
     console.log(
-      'usage: npm run cea -- <preview | dry-run | create [--limit N | --full] | attach-inboxes | fleet:audit [--fix] [--if-stale] | start <seqN> | free-credits [--delete] | clean-caps [--apply] [--limit N]\n' +
+      'usage: npm run cea -- <preview | dry-run | create [--limit N | --full] | attach-inboxes | start <seqN>   (each accepts [--niche <financial_advisors|marketing_agencies>], default financial_advisors)\n' +
+        '                       | fleet:audit [--fix] [--if-stale] | free-credits [--delete] | clean-caps [--apply] [--limit N]\n' +
         '                       | infra:domains [--count N] | infra:connect --file <domains.txt> [--apply] | infra:nameservers --file <csv> [--apply] | infra:inboxes [--file <csv>] [--apply] | infra:dns --file <records.json> [--apply] | infra:workspaces\n' +
         '                       | apollo:count [search] | apollo:ids [search] [--refresh] [--passes N] | apollo:export [search] [--files M | --all] [--refresh] [--passes N] | apollo:parse-url "<url>"\n' +
         '                       | apollo:to-airtable [search] (--workspace <wspId> | --base <appId>) [--table Leads] [--base-name "..."]\n' +
         '                       | verify:credits | verify:emails [--apply] [--reset] [--limit N] [--concurrency N] [--base <appId>] [--table Leads]\n' +
         '                       | verify:export [--statuses valid,catch-all] [--out <file.csv>] [--base <appId>] [--table Leads]\n' +
-        '                       | consulti:credits | consulti:ledger [--backfill] | consulti:pull --search <key> [--count N] [--slice <key>]\n' +
+        '                       | consulti:credits | consulti:verify [--apply] [--limit N] [--concurrency N] [--base <appId>] [--table Leads] | consulti:ledger [--backfill] | consulti:pull --search <key> [--count N] [--slice <key>]\n' +
         '                       | consulti:clean --file <raw.csv> [--ruleset marketing|advisors] [--base <appId> | --no-airtable] [--skip-web] [--concurrency N]>',
     );
     process.exit(1);
