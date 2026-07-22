@@ -228,7 +228,7 @@ async function create(config: NicheConfig, opts: { limit: number | null }): Prom
       (!srcBody.includes('{{first_name}}') || !!first?.email_body.includes('{{first_name}}'));
     const subjectOk = first?.subject === (seq.emails[0]?.subject ?? '');
 
-    console.log(`  ${mark(scheduleOk)} schedule mirrors D100 (Mon–Thu 09:00–15:00, 12min, 25/day)`);
+    console.log(`  ${mark(scheduleOk)} schedule mirrors D100 (Mon–Thu 09:00–15:00, 12min, uncapped leads/day)`);
     console.log(`  ${mark(settingsOk)} tracking OFF + plain text + stop-on-reply`);
     console.log(`  ${mark(seqLenOk && delaysOk)} sequence: ${seqs.length} steps, delays ${JSON.stringify(delays)}`);
     console.log(`  ${mark(spintaxOk)} spintax/merge tags preserved in body`);
