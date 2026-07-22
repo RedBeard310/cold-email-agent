@@ -46,10 +46,8 @@ Rules for this repo:
 
 - **Don't suspend/resume SmartLead inboxes from here.** That lever is owned by the gate (and its `.inbox-health-state.json` in `youtube-email-outreach-v1`). Flipping `is_suspended` from this agent would fight it — the gate re-pauses inboxes you resume and won't auto-resume ones it didn't pause.
 - **Send capacity floats automatically.** The set of live inboxes changes as warmup health rises and falls. Expected, not a bug. Don't hardcode an inbox count or assume a fixed sending pool.
-- **Keep the gate fresh around a send batch.** A local SessionStart hook (in this repo's gitignored `.claude/settings.local.json`) runs the gate when you open this repo, so health is refreshed at your usual entry point. When you build the send path, also refresh it right before pushing: shell out to `cd /Users/caseybrown/Claude/youtube-email-outreach-v1 && npm run inbox-health` (staleness-gated, so it's a cheap no-op when already fresh). Don't reimplement the gate.
+- **Do NOT run the gate from this machine — paused permanently (Casey, 2026-07-22).** The gate now runs from a dedicated repo on Casey's VPS; local runs would be redundant. The SessionStart hook that ran it here was removed on 2026-07-22, and the send path must NOT shell out to `npm run inbox-health`. Do not re-add any local gate automation unless Casey explicitly says to turn it back on.
 - **Manual check (changes nothing):** `cd /Users/caseybrown/Claude/youtube-email-outreach-v1 && npm run inbox-health -- --status`.
-
-**Recommendation (not done — flagging for Casey):** two send-side agents now depend on a gate that physically lives inside one of them. The clean long-term move is to extract the gate into a shared location (its own small repo, or an `env-storage`-adjacent util) so neither send agent "owns" it. Until then the coupling above is the pragmatic path — documented so it's deliberate, not accidental.
 
 ## Campaign hard rules (2026-07-13 incident — do not regress)
 
