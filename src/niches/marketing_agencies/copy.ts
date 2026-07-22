@@ -12,7 +12,8 @@
 // firewall's one ratified exception (2026-07-22). NOT varied, ever: the Amanda proof NUMBERS
 // (0->12k, $1M/yr, 100% — the PS's connective wording may spin, the numbers never), the reply
 // keywords ("video"/"info"), the subject line, paragraph/line-break structure.
-// Lucero E2's first line stays unspun pending Casey's call on the "you talk from" wording.
+// Lucero E2's first line: "you talk from" -> "you talk to from" was a confirmed typo fix
+// (Casey, 2026-07-22), then spun like the rest.
 //
 // A/B test: Seq A (Justin Hillsberg style) vs Seq B (Matt Lucero style). Both share the
 // subject "quick one" on purpose — subject is deliberately NOT a test variable.
@@ -83,7 +84,7 @@ ${SIGNATURE}`;
 
 const LUCERO_E2 = `${GREET}
 
-Every prospect you talk from outreach or ads is cold.
+{Every prospect you talk to from outreach or ads is cold.|Every prospect you talk to from ads or outreach is cold.|Every prospect ads or outreach brings you is cold.}
 
 {Imagine if you had|Picture having} a thriving YouTube channel you {could|can} show them. YouTube does the trust-building {before the call ever starts|before you ever get on the call}. {Your cost per acquisition drops|Your cost to land a client drops} across {every channel you're running|every channel you run}.
 

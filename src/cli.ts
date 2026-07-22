@@ -385,6 +385,20 @@ async function startSequence(config: NicheConfig, seqIndex: number): Promise<voi
   console.log(`Sends within the window (Mon–Thu 09:00–15:00 ET) from healthy inboxes. ${leads} leads in this batch.\n`);
 }
 
+// ---------------- pause a single campaign (stops sending; start resumes) ----------------
+
+async function pauseSequence(config: NicheConfig, seqIndex: number): Promise<void> {
+  const sl = await import('./engine/smartlead');
+  const seq = config.sequences[seqIndex - 1];
+  if (!seq) { console.log(`No sequence #${seqIndex} (have 1..${config.sequences.length})`); process.exit(1); }
+  const name = `${config.campaignPrefix}${seq.name}`;
+  const id = await sl.findCampaignByName(name);
+  if (!id) { console.log(`✗ campaign "${name}" not found — run create first`); process.exit(1); }
+  await sl.pauseCampaign(id);
+  const after = await sl.getCampaign(id);
+  console.log(`${after.status === 'PAUSED' ? '✓ PAUSED' : '? unexpected status'}: ${name} (#${id}) is now ${after.status}`);
+}
+
 // ---------------- clean-caps: fix ALL-CAPS text fields in Airtable ----------------
 
 /**
@@ -513,6 +527,11 @@ switch (cmd) {
     // Positional seq number, ignoring flags (e.g. `start --niche marketing_agencies 2`).
     const pos = rest.filter((t, i) => !t.startsWith('--') && rest[i - 1] !== '--niche');
     await startSequence(activeNiche(rest), Number(pos[0] ?? '0'));
+    break;
+  }
+  case 'pause': {
+    const pos = rest.filter((t, i) => !t.startsWith('--') && rest[i - 1] !== '--niche');
+    await pauseSequence(activeNiche(rest), Number(pos[0] ?? '0'));
     break;
   }
   case 'free-credits':
@@ -749,7 +768,7 @@ switch (cmd) {
 
   default:
     console.log(
-      'usage: npm run cea -- <preview | dry-run | create [--limit N | --full] | attach-inboxes | start <seqN>   (each accepts [--niche <financial_advisors|marketing_agencies>], default financial_advisors)\n' +
+      'usage: npm run cea -- <preview | dry-run | create [--limit N | --full] | attach-inboxes | start <seqN> | pause <seqN>   (each accepts [--niche <financial_advisors|marketing_agencies>], default financial_advisors)\n' +
         '                       | fleet:audit [--fix] [--if-stale] | free-credits [--delete] | clean-caps [--apply] [--limit N]\n' +
         '                       | infra:domains [--count N] | infra:connect --file <domains.txt> [--apply] | infra:nameservers --file <csv> [--apply] | infra:inboxes [--file <csv>] [--apply] | infra:dns --file <records.json> [--apply] | infra:workspaces\n' +
         '                       | apollo:count [search] | apollo:ids [search] [--refresh] [--passes N] | apollo:export [search] [--files M | --all] [--refresh] [--passes N] | apollo:parse-url "<url>"\n' +
