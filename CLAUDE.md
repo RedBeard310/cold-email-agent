@@ -92,3 +92,16 @@ Include, briefly, anything that changes my picture of the work:
 - decisions I still need to make, as a short list at the end
 
 Cut everything else.
+
+---
+
+## Voice Firewall (house law, wired 2026-07-23 — read before writing any prose)
+
+Every reader-facing sentence this repo produces must pass the Voice Firewall. Before writing, read the canonical file:
+
+- Mac: `~/Claude/casey-assistant/brain/content-strategy/voice-firewall.md`
+- VPS: `/home/casey/repos/casey-assistant/brain/content-strategy/voice-firewall.md`
+
+Default cleverness = **level 2 (Dry)** unless the task names a level. The 1-5 levels and their golden examples live in `casey-assistant/brain/content-strategy/cleverness-scale.md` (same folder). Where this skill's own voice rules are stricter, the stricter rule wins.
+
+Fallback (ONLY if the canonical file is unreachable): zero em dashes; level-2 dry style (plain, direct, no ornament, no imagery); every line passes the read-aloud listener gate; and state in your output that the full firewall was not loaded.
