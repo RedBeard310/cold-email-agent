@@ -105,3 +105,20 @@ Every reader-facing sentence this repo produces must pass the Voice Firewall. Be
 Default cleverness = **level 2 (Dry)** unless the task names a level. The 1-5 levels and their golden examples live in `casey-assistant/brain/content-strategy/cleverness-scale.md` (same folder). Where this skill's own voice rules are stricter, the stricter rule wins.
 
 Fallback (ONLY if the canonical file is unreachable): zero em dashes; level-2 dry style (plain, direct, no ornament, no imagery); every line passes the read-aloud listener gate; and state in your output that the full firewall was not loaded.
+
+<!-- LLM-SPEND-GUARD v1 — managed block; keep identical in every repo -->
+## LLM Spend Guard (house law — applies in every repo)
+
+**Subscription chat is fine.** Work billed to a subscription plan (Claude Code on the Max plan, Codex on a ChatGPT plan, whatever the tool) needs no disclosure — just do the task.
+
+**LLM API credits require disclosure BEFORE starting.** If a task will spend metered LLM API credits from ANY provider (Anthropic, OpenAI, OpenRouter, Gemini, Groq, etc.) — including launching a script, pipeline, or service that makes LLM SDK/API calls — the output must state, before the task begins:
+
+- that it will spend API credits, and which provider/key (key by NAME only, never the value)
+- a rough dollar estimate
+
+**Estimated ≥ $1 → hard stop.** Do not start the task until Casey explicitly approves the spend.
+
+**Scope: LLM usage only.** Non-LLM paid APIs (Deepgram, Apify, SmartLead, YouTube, etc.) are exempt from this rule.
+
+**Limitation:** this governs chat-initiated work. Headless automation that is already running doesn't re-read this file mid-run; the rule applies at the moment a session starts, modifies, restarts, or triggers that automation.
+<!-- /LLM-SPEND-GUARD -->
