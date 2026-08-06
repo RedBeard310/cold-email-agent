@@ -102,7 +102,7 @@ Every reader-facing sentence this repo produces must pass the Voice Firewall. Be
 - Mac: `~/Claude/casey-assistant/brain/content-strategy/voice-firewall.md`
 - VPS: `/home/casey/repos/casey-assistant/brain/content-strategy/voice-firewall.md`
 
-Default cleverness = **level 2 (Dry)** unless the task names a level. The 1-5 levels and their golden examples live in `casey-assistant/brain/content-strategy/cleverness-scale.md` (same folder). Where this skill's own voice rules are stricter, the stricter rule wins.
+Default cleverness = **level 2 (Dry)** unless the task names a level. The 1-5 levels and their golden examples live in `casey-assistant/brain/content-strategy/cleverness-scale.md` (same folder). Where this repo and the Law differ, the Law wins (the old "stricter wins" tie-breaker was retired 2026-07-28). Its clarity core is Clear Writing, in the managed block below.
 
 Fallback (ONLY if the canonical file is unreachable): zero em dashes; level-2 dry style (plain, direct, no ornament, no imagery); every line passes the read-aloud listener gate; and state in your output that the full firewall was not loaded.
 
