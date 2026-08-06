@@ -154,3 +154,36 @@ Claude Code *prefers* `ANTHROPIC_API_KEY` over the subscription login whenever t
 House default for research / mining / synthesis work is `openrouter:deepseek/deepseek-v3.2`. Model ids are configuration and are committed; API keys stay in the shared env. Env-based model selection is banned — the Mac clobbers the VPS env file every ~2 minutes, which silently reverted a swap and burned ~$22 of unplanned Sonnet on 2026-07-31.
 
 To change a model: edit `models.json` and commit. Do not hard-code a model id in any module.
+
+<!-- CLEAR-WRITING v1 — managed block; keep identical in every repo -->
+## Clear Writing (house law — wired 2026-08-06)
+
+**Every piece of prose a person will read passes through Clear Writing.** Chat replies, emails, docs, reports, READMEs, notes, commit messages, slide text, Notion pages, client deliverables. No exceptions, in any repo.
+
+**The one bar:** *if a smart high-schooler couldn't follow the idea on the first pass, rewrite it.* Assume the reader knows nothing about the business, hasn't read your other work, and won't read the sentence twice.
+
+The rules, short version:
+
+1. **Read it cold as the person who'll read it.** If a line needs the thinking behind it explained, it fails.
+2. **Define at first use, then restate simpler.** The definition can't contain the confusion. Defining jargon with jargon fails.
+3. **Bridge anything unfamiliar** to something they already know ("it's kinda like..."), then retire the bridge. One analogy per idea, taught in full sentences, connected back once, then back to literal words.
+4. **Zero em dashes.** Commas for asides, periods for full thoughts. Carve-outs: the "— Casey" sign-off and structural separators in a locked template.
+5. **No corporate filler** (unlock, leverage, elevate, move the needle), **no strategist vocabulary** in reader-facing text (funnel, ICP, pain point, install a belief), **no LLM dialect** ("here's the kicker"), **no hedging** (maybe, I think, sort of).
+6. **No "not X, it's Y" as decoration.** Legal only when swapping an old belief the reader actually holds.
+7. **Unpack compressed phrasing.** "A see-it-coming cost" becomes "a cost you can see coming." If a phrase squeezes an action into a metaphor or a hyphen stack, say the action.
+8. **No bumper-sticker closers.** End on the actual mechanic in literal words, never an aphorism.
+9. **Two links is the ceiling on a causal chain.** State the conclusion and trust the reader.
+10. **Contractions on.** Talk TO the reader. Contraction-free essay prose is its own AI tell.
+11. **Concrete beats abstract.** Specifics over adjectives, a worked example over an elegant abstraction, the believable number over the impressive one.
+12. **Never present an invented specific as a real fact.** Ask for it instead.
+
+**Cleverness runs at level 2 (Dry) by default**, everywhere. Plain and direct, no ornament. A format skill may name a different default for its own format (long-form scripts run at 3).
+
+**Full standard** (read it before any substantial writing or rewrite job):
+
+- Mac: `~/Claude/casey-assistant/brain/content-strategy/clear-writing.md`
+- VPS: `/home/casey/repos/casey-assistant/brain/content-strategy/clear-writing.md`
+- Skill: `clear-writing` (invoke it for rewrite jobs; it carries the linter at `scripts/lint.mjs`)
+
+**Scope note.** Clear Writing is a clarity standard, not a persuasion standard. It carries none of the YouTube machinery: no proof stacking, no multiple analogies per idea, no Give Then Gap hook, no CTA rules, and no abrupt ending. **A normal conclusion is allowed.** That machinery stays in `long-form-writing-skill-v3`. For writing another person will read, the Voice Firewall still outranks this block, and format skills add structure on top. Neither may loosen the bar above.
+<!-- /CLEAR-WRITING -->
