@@ -187,3 +187,33 @@ The rules, short version:
 
 **Scope note.** Clear Writing is a clarity standard, not a persuasion standard. It carries none of the YouTube machinery: no proof stacking, no multiple analogies per idea, no Give Then Gap hook, no CTA rules, and no abrupt ending. **A normal conclusion is allowed.** That machinery stays in `long-form-writing-skill-v3`. For writing another person will read, the Voice Firewall still outranks this block, and format skills add structure on top. Neither may loosen the bar above.
 <!-- /CLEAR-WRITING -->
+
+<!-- NOTION-ACCESS v1 — managed block; keep identical in every repo -->
+## Notion Access (house law — wired 2026-08-10)
+
+**There is a Notion API token in the shared env: `NOTION_API_TOKEN`.** It works from any repo, on the Mac and on the VPS, in any session, including headless ones.
+
+**Never report that you can't reach Notion because a connector isn't signed in.** The claude.ai Notion connector has to be authorized per session and doesn't exist in automation. It is a convenience, not the way in. If it isn't there, use the API and carry on with the task.
+
+```bash
+curl -s -X POST "https://api.notion.com/v1/databases/<DATABASE_ID>/query" \
+  -H "Authorization: Bearer $NOTION_API_TOKEN" \
+  -H "Notion-Version: 2022-06-28" \
+  -H "Content-Type: application/json" \
+  -d '{"page_size":100}'
+```
+
+The four things that trip this up:
+
+1. **Pin `Notion-Version: 2022-06-28`.** Notion changes response shapes between versions.
+2. **Paginate.** One request returns 100 rows at most. If the reply says `"has_more": true`, send it again with `"start_cursor"` set to the `next_cursor` you got back. Skip this and a 115-row database silently looks like a 100-row one.
+3. **Read the ID off the URL correctly.** In `app.notion.com/p/<workspace>/<32-char-id>?v=<other-id>`, the chunk in the path is the ID. The one after `?v=` is a saved view and the API rejects it.
+4. **A 404 usually means "not shared," not "missing."** Notion integrations only see what someone hands them. Ask Casey to open the page, click `...`, go to Connections, and add "API For Claude?".
+
+Key values must never be printed, echoed, logged, or committed. That applies to the token itself and to any secret stored inside a Notion database. Pull those into a file, redact before displaying, delete the file after.
+
+**Full standard** (which databases are reachable, the endpoint table, working code to copy):
+
+- Mac: `~/Claude/casey-assistant/brain/infrastructure/notion-access.md`
+- VPS: `/home/casey/repos/casey-assistant/brain/infrastructure/notion-access.md`
+<!-- /NOTION-ACCESS -->
