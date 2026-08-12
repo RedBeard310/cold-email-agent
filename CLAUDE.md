@@ -67,7 +67,7 @@ All secrets come from the **shared `env-storage` repo**, not a local `.env` (con
 
 ## Hard constraints / non-goals (SPEC.md §9)
 
-- **Do NOT reuse or draw from the YouTube-creator cold-email repos or skills** (e.g. `youtube-email-outreach-v1`, the `nick-saraev-cold-email` skill). Those target creators who *already have* a channel; here we *sell YouTube* to people who don't. Opposite audience, opposite message. This is the easiest mistake to make given the YouTube-outreach tooling in this account — don't.
+- **Do NOT reuse or draw from the YouTube-creator cold-email repos or skills** (e.g. `youtube-email-outreach-v1`, the `cold-email-nick-saraev` skill). Those target creators who *already have* a channel; here we *sell YouTube* to people who don't. Opposite audience, opposite message. This is the easiest mistake to make given the YouTube-outreach tooling in this account — don't.
 - **No lead discovery / enrichment here** — that's the upstream per-niche repos.
 - **No copywriting here** — copy is provided externally per niche.
 

@@ -20,7 +20,7 @@ This is the cold-email brain. Matt Lucero runs **Anevo**, a B2B cold-email / app
 
 **How to use it:** consult this repo **first** (before generic/default knowledge) when advising on cold email, and cite the specific framework/transcript when leaning on one.
 
-**Why this is allowed (no conflict with the spec's YouTube ban):** SPEC §9 forbids reusing the *YouTube-creator outreach* repos/skills (`youtube-email-outreach-v1`, the `nick-saraev-cold-email` skill) — that ban is about their **copy + audience** (selling YouTube scripting to creators who already have channels). The Matt Lucero repo is cold-email **craft / methodology** (deliverability, sequencing, copy structure) — vertical-agnostic and exactly what we want. Read-only knowledge source; don't import its code.
+**Why this is allowed (no conflict with the spec's YouTube ban):** SPEC §9 forbids reusing the *YouTube-creator outreach* repos/skills (`youtube-email-outreach-v1`, the `cold-email-nick-saraev` skill) — that ban is about their **copy + audience** (selling YouTube scripting to creators who already have channels). The Matt Lucero repo is cold-email **craft / methodology** (deliverability, sequencing, copy structure) — vertical-agnostic and exactly what we want. Read-only knowledge source; don't import its code.
 
 ## 2. Campaign naming + isolation from the Dream 100
 
