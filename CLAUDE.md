@@ -185,7 +185,7 @@ The rules, short version:
 - VPS: `/home/casey/repos/casey-assistant/brain/content-strategy/clear-writing.md`
 - Skill: `clear-writing` (invoke it for rewrite jobs; it carries the linter at `scripts/lint.mjs`)
 
-**Scope note.** Clear Writing is a clarity standard, not a persuasion standard. It carries none of the YouTube machinery: no proof stacking, no multiple analogies per idea, no Give Then Gap hook, no CTA rules, and no abrupt ending. **A normal conclusion is allowed.** That machinery stays in `long-form-writing-skill-v3`. For writing another person will read, the Voice Firewall still outranks this block, and format skills add structure on top. Neither may loosen the bar above.
+**Scope note.** Clear Writing is a clarity standard, not a persuasion standard. It carries none of the YouTube machinery: no proof stacking, no multiple analogies per idea, no Give Then Gap hook, no CTA rules, and no abrupt ending. **A normal conclusion is allowed.** That machinery stays in `script-writing-long-form-writing-skill-v3`. For writing another person will read, the Voice Firewall still outranks this block, and format skills add structure on top. Neither may loosen the bar above.
 <!-- /CLEAR-WRITING -->
 
 <!-- NOTION-ACCESS v1 — managed block; keep identical in every repo -->
