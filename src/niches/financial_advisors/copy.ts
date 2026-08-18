@@ -22,7 +22,7 @@ const OPENER_A_E1 = `${GREET}
 
 Have you ever thought about getting more clients from YouTube?
 
-My client Amanda Berrientez runs "Retirement Income School". She went from 0 to 12k subscribers in 1 year and is doing just shy of $1M per year in revenue. 100% of her clients come from YouTube.
+My client Amanda Barrientez runs "Retirement Income School". She went from 0 to 12k subscribers in 1 year and is doing just shy of $1M per year in revenue. 100% of her clients come from YouTube.
 
 We can help you attract 15 qualified prospects monthly by managing your entire YouTube presence.
 
@@ -107,7 +107,7 @@ Either way's fine, just don't want to keep landing in your inbox if it's not.`,
 
 You probably get pitched "do YouTube for your practice" a couple times a month, so I'll skip the speech.
 
-I work with Amanda Berrientez, who runs the YouTube Channel "Retirement Income School".
+I work with Amanda Barrientez, who runs the YouTube Channel "Retirement Income School".
 
 She went from 0 to 12k subscribers in a year, and she's now doing just shy of $1M/year from clients who found her on YouTube.
 
