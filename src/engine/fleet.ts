@@ -1,13 +1,19 @@
-// Fleet enforcement: every ACTIVE campaign must (a) have the FULL account inbox pool
-// attached and (b) carry an effectively-unlimited daily lead cap. Throughput is governed
-// by the right layers instead: per-inbox daily limits (message_per_day) and the inbox
-// health gate (account-level is_suspended, owned by youtube-email-outreach-v1).
+// Fleet enforcement: every ACTIVE campaign must (a) have EXACTLY the sending pool attached,
+// no more and no less, and (b) carry an effectively-unlimited daily lead cap. Throughput is
+// governed by the right layers instead: per-inbox daily limits (message_per_day) and the
+// inbox health gate (account-level is_suspended, owned by youtube-email-outreach-v1).
 //
 // Born of the 2026-07-13 incident: FA campaigns silently ran at 25 leads/day from 12
 // legacy inboxes because create/attach mirrored the old Dream 100 campaign. See
 // CLAUDE.md "Campaign hard rules".
+//
+// 2026-09-02: the pool is no longer "every SmartLead account". SmartLead still holds all 150
+// accounts we ever connected, but 140 of them are cancelled or scheduled for cancellation in
+// InboxKit, so they are not ours to send from. InboxKit `status: active` is the one source of
+// truth, and the audit now DETACHES anything outside it as well as attaching what is missing.
 import * as fs from 'node:fs';
 import { env } from '../env';
+import { listWorkspaces, listMailboxes } from '../infra/inboxkit';
 
 const BASE = 'https://server.smartlead.ai/api/v1';
 const CAP_FLOOR = 99_999; // "no cap": SmartLead accepts this and inbox limits govern instead
@@ -36,6 +42,35 @@ export async function listAllEmailAccounts(): Promise<Account[]> {
     if (page.length < limit) break;
   }
   return out;
+}
+
+/** Emails of every InboxKit mailbox with `status: active` — the inboxes we actually pay for
+ *  and are allowed to send from. `active` is a billing status, so it is a permission check,
+ *  not a liveness check; the health gate still decides which of these send on a given day. */
+export async function inboxKitActiveEmails(): Promise<Set<string>> {
+  const out = new Set<string>();
+  for (const ws of await listWorkspaces()) {
+    for (const m of await listMailboxes(ws.uid)) {
+      if (m.status === 'active') out.add(`${m.username}@${m.domain_name}`.toLowerCase());
+    }
+  }
+  return out;
+}
+
+/** The sending pool: SmartLead accounts that are ALSO active in InboxKit. This is the exact
+ *  set every campaign must carry. Throws rather than returning an empty pool, because an
+ *  InboxKit hiccup must never be read as "detach everything". */
+export async function sendingPool(): Promise<Account[]> {
+  const all = await listAllEmailAccounts();
+  const active = await inboxKitActiveEmails();
+  const pool = all.filter((a) => active.has(a.from_email.toLowerCase()));
+  if (pool.length === 0) {
+    throw new Error(
+      `Sending pool is empty: none of ${all.length} SmartLead accounts is active in InboxKit ` +
+        `(${active.size} active mailboxes seen). Refusing to touch campaign inboxes.`,
+    );
+  }
+  return pool;
 }
 
 interface Campaign {
@@ -71,31 +106,41 @@ export async function fleetAudit(opts: { fix: boolean; ifStale?: boolean }): Pro
     console.log('[fleet-audit] state fresh (<12h), skipping. Run without --if-stale to force.');
     return;
   }
-  const pool = await listAllEmailAccounts();
+  const pool = await sendingPool();
   const poolIds = pool.map((a) => a.id);
   console.log(`\n=== FLEET AUDIT ${opts.fix ? '(--fix: repairs applied)' : '(read-only — add --fix to repair)'} ===`);
-  console.log(`account inbox pool: ${pool.length} inboxes (health gate suspends unhealthy ones at send time)\n`);
+  console.log(`sending pool: ${pool.length} InboxKit-active inboxes (health gate suspends unhealthy ones at send time)\n`);
 
   const campaigns = (await req<Campaign[]>('GET', '/campaigns')).filter((c) => c.status === 'ACTIVE');
   let violations = 0;
   for (const c of campaigns) {
     const attached = await req<Account[]>('GET', `/campaigns/${c.id}/email-accounts`);
     const missing = poolIds.filter((id) => !attached.some((a) => a.id === id));
+    const extra = attached.filter((a) => !poolIds.includes(a.id)).map((a) => a.id);
     const detail = await req<Campaign>('GET', `/campaigns/${c.id}`);
     const cap = detail.max_leads_per_day ?? 0;
     const capBad = cap < CAP_FLOOR;
-    const ok = missing.length === 0 && !capBad;
+    const ok = missing.length === 0 && extra.length === 0 && !capBad;
     if (!ok) violations++;
 
     console.log(`${ok ? '✓' : '✗'} #${c.id} ${c.name}`);
     if (missing.length) console.log(`    inboxes: ${attached.length}/${pool.length} attached — ${missing.length} missing`);
+    if (extra.length) console.log(`    inboxes: ${extra.length} attached that are NOT in the sending pool`);
     if (capBad) console.log(`    cap: max_leads_per_day=${cap} (< ${CAP_FLOOR})`);
 
     if (ok || !opts.fix) continue;
+    // Attach first, detach second, so a campaign is never left with zero inboxes mid-repair.
     if (missing.length) {
       await req('POST', `/campaigns/${c.id}/email-accounts`, { email_account_ids: poolIds });
+    }
+    if (extra.length) {
+      for (let i = 0; i < extra.length; i += 50) {
+        await req('DELETE', `/campaigns/${c.id}/email-accounts`, { email_account_ids: extra.slice(i, i + 50) });
+      }
+    }
+    if (missing.length || extra.length) {
       const after = await req<Account[]>('GET', `/campaigns/${c.id}/email-accounts`);
-      console.log(`    → attached full pool: now ${after.length}/${pool.length}`);
+      console.log(`    → pool enforced: now ${after.length}/${pool.length} attached`);
     }
     if (capBad) {
       const cron = detail.scheduler_cron_value ?? {};

@@ -269,21 +269,27 @@ async function create(config: NicheConfig, opts: { limit: number | null }): Prom
 
 async function attachInboxes(config: NicheConfig): Promise<void> {
   const sl = await import('./engine/smartlead');
-  // HARD RULE (2026-07-13): attach the FULL account pool, never a mirror campaign's subset.
-  // The inbox health gate (account-level is_suspended) decides which inboxes actually send.
-  const { listAllEmailAccounts } = await import('./engine/fleet');
-  console.log(`\n=== ${config.niche}: ATTACH INBOXES — full account pool, stay DRAFTED ===\n`);
-  const source = await listAllEmailAccounts();
+  // HARD RULE (2026-07-13, narrowed 2026-09-02): attach the whole SENDING POOL, never a mirror
+  // campaign's subset — and nothing outside it. The pool is the SmartLead accounts that are
+  // still `active` in InboxKit; the other ~140 SmartLead accounts are cancelled mailboxes we no
+  // longer own. The inbox health gate (account-level is_suspended) decides which of the pool
+  // actually send on a given day.
+  const { sendingPool } = await import('./engine/fleet');
+  console.log(`\n=== ${config.niche}: ATTACH INBOXES — sending pool, stay DRAFTED ===\n`);
+  const source = await sendingPool();
   const ids = source.map((a) => a.id);
-  console.log(`Full account inbox pool: ${ids.length} inboxes (gate suspends unhealthy ones at send time)\n`);
+  console.log(`Sending pool: ${ids.length} InboxKit-active inboxes (gate suspends unhealthy ones at send time)\n`);
 
   for (const seq of config.sequences) {
     const name = `${config.campaignPrefix}${seq.name}`;
     const id = await sl.findCampaignByName(name);
     if (!id) { console.log(`  ✗ ${name}: not found — run create first`); continue; }
     await sl.attachEmailAccounts(id, ids);
+    // Attach first, detach second, so the campaign is never left with zero inboxes.
+    const stale = (await sl.listCampaignEmailAccounts(id)).filter((a) => !ids.includes(a.id)).map((a) => a.id);
+    for (let i = 0; i < stale.length; i += 50) await sl.detachEmailAccounts(id, stale.slice(i, i + 50));
     const attached = await sl.listCampaignEmailAccounts(id);
-    console.log(`  ${mark(attached.length >= ids.length)} ${name} (#${id}): ${attached.length} inboxes attached`);
+    console.log(`  ${mark(attached.length === ids.length)} ${name} (#${id}): ${attached.length}/${ids.length} inboxes attached`);
   }
   console.log('\nInboxes attached. Campaigns remain DRAFTED — nothing will send until you start them.\n');
 }
