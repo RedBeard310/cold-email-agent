@@ -32,8 +32,7 @@ const GREET = '{Hey|Hi} {{first_name}},';
 // across a rotating pool of mailboxes. Twelve of them have belonged to invented people since
 // 2026-09-05, so a fixed "Casey" here would sign their mail with his name. SmartLead resolves
 // %sender-firstname% against the mailbox it really used. See claude-skills/_shared/README-sender-identity.md.
-const SIGNATURE = `— %sender-firstname%
-Content Gets Clients`;
+const SIGNATURE = `— %sender-firstname%`;
 
 // ---------------- Seq A — Hillsberg (Justin) ----------------
 
