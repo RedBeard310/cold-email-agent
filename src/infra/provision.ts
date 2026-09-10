@@ -12,6 +12,8 @@ import {
   listMailboxes,
   buyMailboxes,
   connectDomain,
+  setDomainForwarding,
+  BRAND_REDIRECT_URL,
   type BuyItem,
 } from './inboxkit';
 
@@ -229,10 +231,21 @@ export async function connectDomains(opts: { file: string; apply: boolean }): Pr
     await sleep(NS_THROTTLE_MS);
   }
 
-  // Read-back: every domain in the list should now exist in InboxKit.
-  const after = new Set((await listDomains(wsId)).map((d) => d.name.toLowerCase()));
+  // Standing rule: every connected domain redirects to contentgetsclients.com.
+  const wanted = new Set(domains);
+  const connected = (await listDomains(wsId)).filter((d) => wanted.has(d.name.toLowerCase()));
+  const needRedirect = connected.filter((d) => (d.forwarding_url ?? '').replace(/\/+$/, '') !== BRAND_REDIRECT_URL);
+  if (needRedirect.length) await setDomainForwarding(wsId, needRedirect.map((d) => d.uid));
+
+  // Read-back: every domain in the list should now exist in InboxKit and carry the redirect.
+  const afterList = await listDomains(wsId);
+  const after = new Set(afterList.map((d) => d.name.toLowerCase()));
   const missing = domains.filter((d) => !after.has(d));
-  console.log(`\n=== ${fail === 0 && missing.length === 0 ? `ALL ${ok} CONNECTED + DELEGATED` : `${ok} ok, ${fail} failed${missing.length ? `, missing from InboxKit: ${missing.join(', ')}` : ''}`} ===`);
+  const noRedirect = afterList
+    .filter((d) => wanted.has(d.name.toLowerCase()) && (d.forwarding_url ?? '').replace(/\/+$/, '') !== BRAND_REDIRECT_URL)
+    .map((d) => d.name);
+  console.log(`redirect → ${BRAND_REDIRECT_URL}: set on ${needRedirect.length}, missing on ${noRedirect.length}${noRedirect.length ? ` (${noRedirect.join(', ')})` : ''}`);
+  console.log(`\n=== ${fail === 0 && missing.length === 0 && noRedirect.length === 0 ? `ALL ${ok} CONNECTED + DELEGATED + REDIRECTED` : `${ok} ok, ${fail} failed${missing.length ? `, missing from InboxKit: ${missing.join(', ')}` : ''}${noRedirect.length ? `, no redirect: ${noRedirect.join(', ')}` : ''}`} ===`);
   console.log('NS changes propagate over minutes–hours; InboxKit verifies + manages DNS in Cloudflare once live.');
   console.log('Mailboxes are NOT created by this command — that is infra:inboxes (spends slots/credits).\n');
 }

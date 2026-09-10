@@ -83,7 +83,18 @@ export interface Domain {
   nameserver_match_status?: string;
   dns_propagation_status?: string;
   assigned_mailboxes?: number;
+  forwarding_url?: string;
 }
+
+/** Standing rule (2026-09-10): every domain connected to InboxKit redirects to the brand site. */
+export const BRAND_REDIRECT_URL = 'https://contentgetsclients.com';
+
+/** Set the web redirect on domains. POST /v1/api/domains/forwarding (pass '' to remove). Free. */
+export const setDomainForwarding = (workspaceId: string, uids: string[], url = BRAND_REDIRECT_URL) =>
+  req<{ error?: boolean; message?: string }>('POST', '/v1/api/domains/forwarding', {
+    workspaceId,
+    body: { uids, forwarding_url: url },
+  });
 export async function listDomains(workspaceId: string): Promise<Domain[]> {
   const out: Domain[] = [];
   for (let page = 1; ; page++) {
