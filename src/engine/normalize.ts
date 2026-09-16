@@ -1,7 +1,7 @@
 // Field value transforms used in niche field maps.
 
 /**
- * Title-case a first name. The financial_advisors Airtable source is ~77% ALL CAPS
+ * Title-case a first name. The financial_advisors lead data is ~77% ALL CAPS
  * ("RONALD"), which would render "Hey RONALD," — the loudest mail-merge tell there is.
  * This normalizes RONALD -> Ronald, MARY ANN -> Mary Ann, O'BRIEN -> O'Brien, while
  * leaving short all-caps tokens (AJ, JC, TJ) alone since those are usually initials.
@@ -18,7 +18,7 @@ export function titleCaseName(raw: unknown): string | null {
 
 // --- Generic title-caser for company names, legal names, cities, and addresses ---
 //
-// The financial_advisors Airtable is mostly ALL CAPS across text fields, not just first
+// The financial_advisors lead table is mostly ALL CAPS across text fields, not just first
 // names: "SAN ANTONIO WEALTH, LLC", "SAN DIEGO", "2221 CAMINO DEL RIO SOUTH". This
 // title-cases those while (a) keeping known all-caps tokens uppercase (LLC, LP, roman
 // numerals, street directionals), (b) lowercasing minor joiner words except when first,

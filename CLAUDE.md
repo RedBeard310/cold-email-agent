@@ -2,13 +2,13 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Current state: spec-only, pre-implementation
+## Current state: a working TypeScript CLI
 
-This repo currently contains **only `SPEC.md` and `README.md` — no code, no `package.json`, no build/test/lint, not yet a git repo.** Read [SPEC.md](SPEC.md) first; it is the governing document. The spec is deliberately broad — sequencing, copy mapping, and per-campaign mechanics are decided *while building*, not pre-specified (see SPEC.md §8 for what is intentionally left open). When you implement something the spec left open, you are making the decision, not discovering it.
+This repo is a git repo with a TypeScript command-line tool. `src/cli.ts` is the entry point (`npm run cea -- <command>`), `npm run typecheck` checks types, and there are no test or lint scripts. Read [SPEC.md](SPEC.md) first; it is the governing document. The spec is deliberately broad — sequencing, copy mapping, and per-campaign mechanics are decided *while building*, not pre-specified (see SPEC.md §8 for what is intentionally left open). When you implement something the spec left open, you are making the decision, not discovering it.
 
 ## What this is
 
-A **generalist, send-side cold-email outreach agent**. It reads an already-built lead list for a "niche" from Airtable, maps lead fields to SmartLead personalization variables, and pushes leads into SmartLead campaigns. **SmartLead** (not this agent) owns all sequencing, sending, inbox rotation, warmup, and reply detection.
+A **generalist, send-side cold-email outreach agent**. It reads an already-built lead list for a "niche" from Postgres (one table per niche in the `niche_leads` schema), maps lead fields to SmartLead personalization variables, and pushes leads into SmartLead campaigns. **SmartLead** (not this agent) owns all sequencing, sending, inbox rotation, warmup, and reply detection.
 
 It does **not** discover, enrich, or write copy. Those happen upstream/externally.
 
@@ -16,23 +16,58 @@ It does **not** discover, enrich, or write copy. Those happen upstream/externall
 
 The entire design rests on **niche-agnostic core, niche-specific config** (SPEC.md §3):
 
-- **Core engine** knows nothing about any vertical: SmartLead client, Airtable lead loading, field→variable mapping, suppression/dedup, secret wiring.
-- **Niche config** (one self-contained unit per target category) declares: its Airtable base/table, its field map, its SmartLead campaign(s), its offer/angle, and a pointer to where its copy lives.
+- **Core engine** knows nothing about any vertical: SmartLead client, Postgres lead loading ([src/engine/db.ts](src/engine/db.ts)), field→variable mapping, suppression/dedup, secret wiring.
+- **Niche config** (one self-contained unit per target category) declares: its lead table (`niche_leads.<name>`) and optional SQL segment, its field map, its SmartLead campaign(s), its offer/angle, and a pointer to where its copy lives.
 
 **Adding a niche = add a niche config, never a new repo.** Keep all vertical-specific logic inside niche configs; if you find yourself special-casing a vertical in the engine, that's the wrong layer.
 
 ## First niche: `financial_advisors`
 
-The only fully-defined niche (SPEC.md §4). Audience: independent state-registered RIAs who **do not** have a YouTube channel. The offer is "you should *start* using YouTube to get clients" — **not** "you already have YouTube." Lead source: Airtable base **`appvEVgfYvyNIms2h`** (~4,565 verified leads). Lead fields and suggested segmentation levers (by `tag`, e.g. `retirement_income`; by `email_origin`, `scraped` before `constructed`) are in SPEC.md §4.
+The only fully-defined niche (SPEC.md §4). Audience: independent state-registered RIAs who **do not** have a YouTube channel. The offer is "you should *start* using YouTube to get clients" — **not** "you already have YouTube." Lead source: **`niche_leads.financial_advisors`** in Postgres (~4,565 verified leads, copied out of Airtable base `appvEVgfYvyNIms2h` on 2026-09-13). Lead fields and suggested segmentation levers (by `tag`, e.g. `retirement_income`; by `email_origin`, `scraped` before `constructed`) are in SPEC.md §4.
 
 ## Integration points (the whole job lives at these two boundaries)
 
 ```
-finance-lead-finder ──► Airtable (per-niche base) ──► THIS AGENT ──► SmartLead (campaigns/sending)
+finance-lead-finder ──► Postgres (niche_leads.<table>) ──► THIS AGENT ──► SmartLead (campaigns/sending)
 ```
 
-- **Upstream:** [finance-lead-finder](../finance-lead-finder/) produces the financial-advisor lead list into Airtable base `appvEVgfYvyNIms2h`. Each future niche gets its own upstream repo + own base.
+- **Upstream:** [finance-lead-finder](../finance-lead-finder/) built the financial-advisor lead list, which now lives in `niche_leads.financial_advisors`. That repo's own move off Airtable is tracked separately. Each future niche gets its own upstream repo and its own lead table, created by a SQL file in [migrations/](migrations/).
 - **Downstream:** the existing SmartLead account, inboxes, and warmup — no new account.
+
+## Where the leads live (Postgres, since 2026-09-13)
+
+The leads used to sit in seven Airtable bases. On 2026-09-13 they were exported and loaded into the `pipeline` Postgres database, the same database the YouTube pipeline uses. Airtable is canceled, and no code here calls it.
+
+| Table | Rows loaded 2026-09-13 | What's in it |
+|---|---|---|
+| `niche_leads.financial_advisors` | 4,565 | Registration-scraped advisors, used by the `financial_advisors` niche |
+| `niche_leads.financial_advisors_consulti` | 7,813 | Advisors found through Consulti |
+| `niche_leads.marketing_agencies` | 10,833 | Apollo and Consulti agency leads, used by the `marketing_agencies` niche |
+| `niche_leads.legal` | 2,592 | Consulti leads |
+| `niche_leads.accounting` | 2,521 | Consulti leads |
+| `niche_leads.health_clinics` | 2,547 | Consulti leads |
+| `niche_leads.management_consulting` | 2,539 | Consulti leads |
+| `niche_leads.staffing_recruiting` | 2,411 | Consulti leads |
+
+- **Raw copy.** Every exported Airtable table is stored exactly as exported in `archive.airtable_records`, with one row per table in `archive.airtable_tables`. It's history, so don't write to it. `scripts/load-airtable-export.ts` did the one-time load and `scripts/verify-airtable-load.ts` checks it against the export files. Neither calls Airtable.
+- **Record ids** keep their old `rec...` format as primary keys, so anything that saved an id still finds its row.
+- **Code.** [src/engine/db.ts](src/engine/db.ts) is the only CLI code that reads or writes these tables. It accepts only the eight tables above, checks column names against the database, binds every value as a parameter, and runs each write in one transaction.
+- **Schema changes** are SQL files in [migrations/](migrations/). No command creates tables or columns.
+- **Renamed commands.** `apollo:to-airtable` is now `apollo:to-db`, `consulti:to-airtable` is now `consulti:to-db`, and `--no-airtable` is now `--no-dedupe`. The old names still work and print a one-line notice. Choose a table with `--table niche_leads.<name>`. The old `--base` flag is refused.
+- **`apollo:to-db` and `consulti:to-db` need `--table`.** Neither has a default, because both write to live leads. A CSV row that matches a lead already in the table updates that lead, and three things stay as they are:
+  - **Checked emails.** A lead with an `email_verified_date` keeps its `email` and `email_status`. Both verify commands skip any lead that has that date, so an overwritten status would never come back, and the lead would stay off the send list.
+  - **Labels.** `consulti:to-db` never writes `email_status`, `source` or `search_name` on a matched lead. `apollo:to-db` leaves them alone on a lead from another source, such as a Consulti lead matched by email.
+  - **Names.** A lead that already has a `first_name` or `last_name` keeps it. `consulti:prune` corrects first names to match the inbox owner, and the CSVs still hold the old names.
+- **Pruned leads stay deleted.** `consulti:prune` lists every lead it deletes in `consulti-pruned-<date>.csv`, in the folder it runs from. Both load commands read those files from the current folder and skip any new row whose email is listed. If the folder has no archive, they refuse to add new leads. Run them from the folder that holds the archives, or pass `--skip-prune-check` to add leads without the check. On 2026-09-13 the four archives were in the Mac copy of this repo (`~/Claude/cold-email-agent`), and the VPS copy had none. Keep them: they're gitignored, so git holds no copy.
+- **A load never writes one email twice.** When two rows in the same load would give two leads the same email, the first row wins and the other is skipped. Before this rule, one shared email in the Apollo export made the whole `apollo:to-db` load roll back.
+
+**Running the CLI on the VPS** takes one step after this change merges: run `npm install` in `/home/casey/repos/cold-email-agent`. That adds `node_modules/pipeline-db`, a link to `../pipeline-db`. On 2026-09-13 the live checkout didn't have it, and until it does, every command that reads or writes leads stops with `ERR_MODULE_NOT_FOUND`. The Mac copy needs the same install (step 1 below). The connection string needs nothing extra. The shell loads `DATABASE_URL` from env-storage, and `pipeline-db` falls back to `/home/casey/.pipeline-db.env` when it isn't set. Both held the same connection string on 2026-09-13.
+
+**Running it on the Mac** takes three steps, because the database only accepts connections from the VPS:
+
+1. Check out `pipeline-db` next to this repo (`../pipeline-db`) with its `dist/` built, then run `npm install`. The dependency is `file:../pipeline-db`.
+2. Open a tunnel in its own terminal: `ssh -N -L 15432:10.0.0.3:5432 vps`.
+3. Set `PIPELINE_DATABASE_URL` to the connection string from `/home/casey/.pipeline-db.env` on the VPS, with the host and port changed to `localhost:15432`. It takes priority over the `DATABASE_URL` your Mac shell already gets from env-storage, which points at the database's private address and can't connect from the Mac. Set it in your shell only. env-storage syncs to the VPS, where `localhost:15432` doesn't exist.
 
 ## Inbox health gate — shared SmartLead inboxes (lives in `youtube-email-outreach-v1`)
 
@@ -51,7 +86,7 @@ Rules for this repo:
 
 ## Campaign hard rules (2026-07-13 incident — do not regress)
 
-On 2026-07-13 we discovered every ACTIVE campaign (all 3 FA + all 10 Dream 100) was silently sending from only **12 legacy inboxes at 25 new leads/day**, because `create`/`attach-inboxes` mirrored the old Dream 100 campaign's settings and inbox pool — the 120-inbox fleet sat unused. These rules are enforced by `npm run cea -- fleet:audit --fix` ([src/engine/fleet.ts](src/engine/fleet.ts)), which also runs staleness-gated (12h) from the SessionStart hook in `.claude/settings.local.json`:
+On 2026-07-13 we discovered every ACTIVE campaign (all 3 FA + all 10 Dream 100) was silently sending from only **12 legacy inboxes at 25 new leads/day**, because `create`/`attach-inboxes` mirrored the old Dream 100 campaign's settings and inbox pool — the 120-inbox fleet sat unused. These rules are coded in `fleetAudit()` in [src/engine/fleet.ts](src/engine/fleet.ts), which the `fleet:audit --fix` command runs. That command used to run staleness-gated (12h) from a SessionStart hook in `.claude/settings.local.json`, but that's history. The hook was removed on purpose on 2026-09-13 for Operation Siege, because `fleet:audit --fix` attaches every sending inbox to every campaign. Siege's sending design is one SmartLead campaign per inbox, with only that inbox attached, so the command would undo it. Read `~/Claude/casey-assistant/brain/lead-gen/operation-siege.md` (around lines 136 to 140) before you run the command or restore the hook. On 2026-09-13 neither `.claude/settings.local.json` nor `~/.claude/settings.json` on the Mac set any hook. The rules:
 
 1. **Every campaign gets EXACTLY the sending pool attached** — never a subset, never a mirror of another campaign's pool, and never anything outside the pool. The inbox health gate (account-level `is_suspended`) decides which of the pool actually send on a given day; attaching warming inboxes is safe and means they auto-join every campaign the moment the gate releases them. (Note: SmartLead's `GET /email-accounts` list does NOT return `is_suspended` — don't conclude "nothing is paused" from it; the gate's `--status` output is ground truth.)
 
@@ -65,7 +100,8 @@ On 2026-07-13 we discovered every ACTIVE campaign (all 3 FA + all 10 Dream 100) 
 All secrets come from the **shared `env-storage` repo**, not a local `.env` (consistent with sibling projects):
 
 - Path: `/Users/caseybrown/Claude/env-storage/.env`
-- Keys (confirmed present): `SMARTLEAD_API_KEY`, `AIRTABLE_PAT`
+- Keys (confirmed present): `SMARTLEAD_API_KEY`
+- `DATABASE_URL` (the Postgres connection string) is also in env-storage. `pipeline-db` checks `PIPELINE_DATABASE_URL` first, then `DATABASE_URL`, then the file `/home/casey/.pipeline-db.env` on the VPS. On 2026-09-13 the env-storage value on the VPS matched that file.
 
 ## Hard constraints / non-goals (SPEC.md §9)
 

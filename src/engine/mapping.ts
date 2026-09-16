@@ -1,4 +1,4 @@
-// Apply a niche field map to one Airtable record -> a SmartLead lead object.
+// Apply a niche field map to one lead row (column -> value) -> a SmartLead lead object.
 import type { NicheConfig } from './types';
 
 export function mapLead(

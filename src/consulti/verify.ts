@@ -1,21 +1,21 @@
-// Verify un-checked Airtable emails with Consulti's verification API (POST /verify, 1 credit).
+// Verify un-checked lead emails with Consulti's verification API (POST /verify, 1 credit).
 //
 // Companion to the ZeroBounce flow (src/verify/emails.ts) and the standing path for future
-// Consulti tranches: consulti:to-airtable stamps new imports email_status='not_checked', and
+// Consulti tranches: consulti:to-db stamps new imports email_status='not_checked', and
 // those get verified here with Consulti's own verification credits (Casey's call, 2026-07-22)
 // instead of ZeroBounce.
 //
 // Same safety model as the ZB flow: dry-run by default (--apply gates all spend + writes),
 // resumable (rows carrying email_verified_date are skipped; each chunk writes incrementally),
 // distinct emails verified once and fanned out to duplicate rows. The status map keeps the
-// niche segmentFormula ({email_status}='valid') working: good->valid, bad->invalid,
+// niche segment (email_status = 'valid') working: good->valid, bad->invalid,
 // risky->risky, unknown->unknown. `unknown` is transient per Consulti docs, so it gets NO
 // date stamp — the next run picks it up again. Catch-all/role/disposable flags land in
 // email_sub_status only — this command records verdicts, it never rejects leads (freemail is
 // NEVER treated specially — hard rule). The 5-credit /verify/catchall endpoint is never called.
 
-import { fetchRecords } from '../engine/airtable';
-import { ensureSchema, writeUpdates, mapPool, VERIFIED_DATE, SUB_STATUS } from '../verify/emails';
+import { fetchLeads, requireColumns, updateLeads, type LeadTable } from '../engine/db';
+import { mapPool, VERIFIED_DATE, SUB_STATUS, VERIFY_COLUMNS } from '../verify/emails';
 import { getCredits, verifyEmail, InsufficientCreditsError } from './client';
 
 /** Consulti verdict -> our email_status vocabulary (shared with the ZB flow). */
@@ -24,31 +24,33 @@ const STATUS_MAP: Record<string, string> = { good: 'valid', bad: 'invalid', risk
 const normEmail = (v: unknown): string => String(v ?? '').trim().toLowerCase();
 
 export interface ConsultiVerifyOpts {
-  baseId: string;
-  table: string;
+  table: LeadTable;
   apply: boolean;
   limit: number | null;
   concurrency: number;
 }
 
 export async function consultiVerify(opts: ConsultiVerifyOpts): Promise<void> {
-  const { baseId, table } = opts;
-  console.log(`\n=== CONSULTI VERIFY — ${opts.apply ? 'APPLY (writes to Airtable + spends verification credits)' : 'DRY RUN (no verify calls, no writes)'} ===`);
-  console.log(`base ${baseId} / "${table}"${opts.limit != null ? ` · limit ${opts.limit} distinct emails` : ''} · concurrency ${opts.concurrency}\n`);
+  const { table } = opts;
+  console.log(`\n=== CONSULTI VERIFY — ${opts.apply ? 'APPLY (writes to the database + spends verification credits)' : 'DRY RUN (no verify calls, no writes)'} ===`);
+  console.log(`${table}${opts.limit != null ? ` · limit ${opts.limit} distinct emails` : ''} · concurrency ${opts.concurrency}\n`);
 
   const credits = await getCredits();
   console.log(`Consulti verification credits available: ${credits.verification_credits}`);
 
-  console.log('\nEnsuring schema…');
-  const { tableId } = await ensureSchema(baseId, table, opts.apply);
+  await requireColumns(table, VERIFY_COLUMNS);
 
   // Only the rows this command owns: never-checked imports, plus transient `unknown` verdicts
-  // that were deliberately left un-dated so they retry here.
-  const formula = `OR({email_status}='not_checked', AND({email_status}='unknown', {${VERIFIED_DATE}}=BLANK()))`;
-  console.log('\nReading un-verified records from Airtable…');
-  const records = await fetchRecords(baseId, table, {
-    filterByFormula: formula,
-    fields: ['email', 'email_status', VERIFIED_DATE],
+  // that were deliberately left un-dated so they retry here. The date test works for both column
+  // types in use: date, and text in niche_leads.financial_advisors_consulti, where blank can be ''.
+  const pending = {
+    sql: "email_status = $1 OR (email_status = $2 AND NULLIF(email_verified_date::text, '') IS NULL)",
+    params: ['not_checked', 'unknown'],
+  };
+  console.log('\nReading un-verified records from the database…');
+  const records = await fetchLeads(table, {
+    columns: ['email', 'email_status', VERIFIED_DATE],
+    where: pending,
   });
   console.log(`  ${records.length} record(s) matching`);
 
@@ -119,7 +121,7 @@ export async function consultiVerify(opts: ConsultiVerifyOpts): Promise<void> {
         });
       }
     }
-    if (updates.length) await writeUpdates(baseId, tableId, updates);
+    if (updates.length) await updateLeads(table, updates);
     verified += results.filter(Boolean).length;
     console.log(`  …${Math.min(i + CHUNK, emails.length)}/${emails.length} emails checked (${verified} written)`);
   }

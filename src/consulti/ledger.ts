@@ -1,7 +1,7 @@
 // Off-machine ledger of every lead we've ever paid Consulti for.
 //
 // Why it exists (Casey, 2026-07-10): the cursor file and raw CSVs are local-only and
-// gitignored, and Airtable only holds APPROVED leads — the bought-but-rejected slice lives
+// gitignored, and the niche_leads tables only hold APPROVED leads — the bought-but-rejected slice lives
 // nowhere else. This mirrors every billed email into a Consulti list on THEIR servers, so a
 // dead laptop can't make us re-buy leads: export the list from the UI and the dedupe memory
 // is restored. (The API can't read list members back or exclude lists from searches — this is

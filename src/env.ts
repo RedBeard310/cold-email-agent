@@ -1,4 +1,6 @@
 // Secrets come from the shared env-storage repo, not a local .env (SPEC.md §10).
+// The lead tables live in Postgres. pipeline-db finds the connection string on its own
+// (PIPELINE_DATABASE_URL, then DATABASE_URL, then /home/casey/.pipeline-db.env), so it isn't here.
 import { config } from 'dotenv';
 import { z } from 'zod';
 
@@ -11,10 +13,6 @@ for (const p of ['/Users/caseybrown/Claude/env-storage/.env', '/home/casey/env-s
 export const env = z
   .object({
     SMARTLEAD_API_KEY: z.string().min(1, 'SMARTLEAD_API_KEY missing from env-storage/.env'),
-    AIRTABLE_PAT: z.string().min(1, 'AIRTABLE_PAT missing from env-storage/.env'),
-    // Workspace to create new lead bases in (e.g. `apollo:to-airtable`). Only needed when creating
-    // a base; reads/writes to an existing base don't use it.
-    AIRTABLE_WORKSPACE_ID: z.string().optional(),
     // Infra provisioning — only the `infra:*` commands need these, so they are optional and the
     // adapters assert presence at call time. Spaceship = registrar + DNS; InboxKit = mailbox host
     // + warmup. NOTE: the Spaceship API key is stored under SPACESHIP_API (not SPACESHIP_API_KEY).

@@ -32,12 +32,12 @@ When future niches come online they'll follow the same pattern with their own pr
 
 ## 3. Marketing agencies niche — next steps (pick up here)
 
-**Where it stands (2026-07-01):** The `marketing_agencies` niche's leads are DONE and loaded. 11,580 Apollo leads (from the "Marketing Agencies 1" saved search — small agencies, 1–20 employees, US/CA/AU/UK, owner/founder/CEO/managing-partner, verified emails) live in Airtable base **`appGzk9z2io4dPJUB`** ("Marketing Agency Leads", table "Leads"). Built via the new `src/apollo/` tooling; ~11,580 credits spent. See memory `marketing-agencies-leads` for full detail.
+**Where it stands (2026-07-01):** The `marketing_agencies` niche's leads are DONE and loaded. 11,580 Apollo leads (from the "Marketing Agencies 1" saved search — small agencies, 1–20 employees, US/CA/AU/UK, owner/founder/CEO/managing-partner, verified emails) lived in Airtable base `appGzk9z2io4dPJUB` ("Marketing Agency Leads", table "Leads"). Since 2026-09-13 they live in Postgres as **`niche_leads.marketing_agencies`**. Built via the new `src/apollo/` tooling; ~11,580 credits spent. See memory `marketing-agencies-leads` for full detail.
 
 **Next steps (not started — resume next session):**
 
 1. **Validate the emails.** ~11,566 have emails (11,563 already Apollo-verified), but run them through a verifier before sending. `EMAIL_VERIFIER_API_KEY` is in env-storage; the finance pipeline's `verification_status` field is the pattern to mirror.
 2. **Write the email sequences / copy.** The offer is "sell agencies on [X]." Pull all copy/sequencing/cadence guidance from the Matt Lucero knowledge repo per reminder #1. Copy is provided/written per niche — not from the YouTube-creator repos (SPEC §9).
-3. **Build a `marketing_agencies` niche config** (mirror `src/niches/financial_advisors/config.ts`): point it at base `appGzk9z2io4dPJUB`, map Airtable fields → SmartLead variables, set the campaign prefix (e.g. `Marketing Agency: `), then split + push into SmartLead — the SAME shared, inbox-health-gated SmartLead account as the advisors.
+3. **Build a `marketing_agencies` niche config** (mirror `src/niches/financial_advisors/config.ts`): point it at `niche_leads.marketing_agencies`, map its columns → SmartLead variables, set the campaign prefix (e.g. `Marketing Agency: `), then split + push into SmartLead — the SAME shared, inbox-health-gated SmartLead account as the advisors.
 
 Not touching send infra until copy + validation are ready.

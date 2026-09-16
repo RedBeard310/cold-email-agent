@@ -1,5 +1,6 @@
 // Niche-agnostic engine types. Anything vertical-specific lives in a niche config
 // (src/niches/<niche>/), never here. See SPEC.md §3.
+import type { LeadTable, SqlFilter } from './lead-tables';
 
 /** One email step within a sequence. */
 export interface EmailStep {
@@ -18,11 +19,11 @@ export interface SequenceDef {
   emails: EmailStep[];
 }
 
-/** Maps one SmartLead lead field to an Airtable source field + optional transform. */
+/** Maps one SmartLead lead field to a column in the niche's lead table + optional transform. */
 export interface FieldMapEntry {
-  /** Airtable source field name. */
+  /** Column name in the niche's lead table. */
   from: string;
-  /** Transform raw Airtable value -> string to send (or null to omit / use fallback). */
+  /** Transform the raw column value -> string to send (or null to omit / use fallback). */
   transform?: (raw: unknown) => string | null;
   /** Value to use when the transform yields null/empty. */
   fallback?: string;
@@ -31,13 +32,13 @@ export interface FieldMapEntry {
 /** A self-contained niche. Adding a niche = add one of these (SPEC.md §3). */
 export interface NicheConfig {
   niche: string;
-  airtable: {
-    baseId: string;
-    table: string;
-    /** Airtable filterByFormula to select the active segment (optional). */
-    segmentFormula?: string;
+  leads: {
+    /** The Postgres table holding this niche's leads, e.g. 'niche_leads.financial_advisors'. */
+    table: LeadTable;
+    /** SQL condition selecting the active segment (optional). Values go in params ($1, $2), never in sql. */
+    segment?: SqlFilter;
   };
-  /** SmartLead lead field -> Airtable source. `email` is required. */
+  /** SmartLead lead field -> lead table column. `email` is required. */
   fieldMap: Record<string, FieldMapEntry>;
   /** Prefix for every campaign this niche creates, e.g. "Financial Advisor: ". */
   campaignPrefix: string;

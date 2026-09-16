@@ -9,12 +9,12 @@
 //                       anything without an owner signal
 //   4. blocklist        company/domain names that mark the known wrong-vertical noise
 //                       (promo products, printing, signs, publishers, ...)
-//   5. airtable-dup     email already in the lead base (Apollo overlap ≈8%, or a prior ingest)
+//   5. db-dup           email already in a niche lead table (Apollo overlap ≈8%, or a prior ingest)
 //   6. dead-site        company domain doesn't respond at all (DNS/timeout/conn refused).
 //                       Bot walls (403/429/503) count as ALIVE — uncertain is not dead.
 import fs from 'node:fs';
 import path from 'node:path';
-import { env } from '../env';
+import { fetchLeads, type LeadTable } from '../engine/db';
 import { COLUMNS, parseCsv, csvCell } from './pull';
 
 type Row = Record<string, string>;
@@ -148,22 +148,13 @@ function normalizeRow(r: Row): Row {
   };
 }
 
-// ---------------- Airtable existing-email fetch ----------------
+// ---------------- existing-email fetch (niche lead tables) ----------------
 
-async function airtableEmails(baseId: string, table: string): Promise<Set<string>> {
+async function existingEmails(table: LeadTable): Promise<Set<string>> {
   const emails = new Set<string>();
-  let offset: string | undefined;
-  do {
-    const url = new URL(`https://api.airtable.com/v0/${baseId}/${encodeURIComponent(table)}`);
-    url.searchParams.set('pageSize', '100');
-    url.searchParams.append('fields[]', 'email');
-    if (offset) url.searchParams.set('offset', offset);
-    const res = await fetch(url, { headers: { Authorization: `Bearer ${env.AIRTABLE_PAT}` } });
-    if (!res.ok) throw new Error(`Airtable ${baseId}/${table} -> ${res.status}: ${(await res.text()).slice(0, 200)}`);
-    const data = (await res.json()) as { records: { fields: { email?: string } }[]; offset?: string };
-    for (const r of data.records) if (r.fields.email) emails.add(r.fields.email.trim().toLowerCase());
-    offset = data.offset;
-  } while (offset);
+  for (const r of await fetchLeads(table, { columns: ['email'] })) {
+    if (typeof r.fields.email === 'string') emails.add(r.fields.email.trim().toLowerCase());
+  }
   return emails;
 }
 
@@ -205,8 +196,8 @@ async function checkSites(domains: string[], concurrency: number): Promise<Map<s
 export interface CleanOpts {
   file: string;
   ruleset: string;
-  /** Airtable tables whose existing emails are rejected as dups (empty = skip). */
-  dedupe: { baseId: string; table: string }[];
+  /** Lead tables whose existing emails are rejected as dups (empty = skip). */
+  dedupe: LeadTable[];
   skipWeb: boolean;
   concurrency: number;
 }
@@ -272,12 +263,12 @@ export async function clean(opts: CleanOpts): Promise<void> {
     });
   }
 
-  // 5: already in Airtable (any of the configured tables)
-  for (const { baseId, table } of opts.dedupe) {
-    console.log(`Fetching existing emails from Airtable ${baseId}/${table}...`);
-    const existing = await airtableEmails(baseId, table);
+  // 5: already in the database (any of the configured lead tables)
+  for (const table of opts.dedupe) {
+    console.log(`Fetching existing emails from ${table}...`);
+    const existing = await existingEmails(table);
     console.log(`  ${existing.size} existing emails`);
-    pool = pool.filter((r) => (existing.has((r.email ?? '').trim().toLowerCase()) ? (reject(r, 'airtable-dup'), false) : true));
+    pool = pool.filter((r) => (existing.has((r.email ?? '').trim().toLowerCase()) ? (reject(r, 'db-dup'), false) : true));
   }
 
   // 6: dead site

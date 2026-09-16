@@ -1,12 +1,13 @@
 // Thin CLI dispatcher (house style: src/cli.ts -> subcommands).
 //   preview            — render the active niche's campaigns offline (no network)
-//   dry-run            — read Airtable, map/split, mirror D100 settings, write a plan file. No writes.
+//   dry-run            — read the niche's lead table in Postgres, map/split, mirror D100 settings, write a plan file. No writes.
 //   create [--limit N] — create campaigns DRAFTED/paused, configure, verify, load N leads
 //                        (default 50). --full loads the whole segment. Never starts, never
 //                        attaches inboxes.
 
 import { NICHES } from './niches';
 import { expandSpintax, spintaxVariants } from './engine/spintax';
+import { LEAD_TABLES, parseLeadTable, type LeadTable } from './engine/lead-tables';
 import type { NicheConfig } from './engine/types';
 
 /** Campaign whose schedule/settings we mirror (a live Dream 100 campaign). */
@@ -60,16 +61,16 @@ interface LeadPlan {
 }
 
 async function buildLeadPlan(config: NicheConfig): Promise<LeadPlan> {
-  const { fetchRecords } = await import('./engine/airtable');
+  const { fetchLeads } = await import('./engine/db');
   const { mapLead } = await import('./engine/mapping');
   const { equalSplit } = await import('./engine/split');
 
   const nameField = config.fieldMap.first_name?.from ?? '';
-  const fieldsNeeded = [...new Set(Object.values(config.fieldMap).map((e) => e.from))];
-  console.log(`Reading segment from Airtable ${config.airtable.baseId} / "${config.airtable.table}"…`);
-  const records = await fetchRecords(config.airtable.baseId, config.airtable.table, {
-    filterByFormula: config.airtable.segmentFormula,
-    fields: fieldsNeeded,
+  const columnsNeeded = [...new Set(Object.values(config.fieldMap).map((e) => e.from))];
+  console.log(`Reading segment from ${config.leads.table}…`);
+  const records = await fetchLeads(config.leads.table, {
+    columns: columnsNeeded,
+    where: config.leads.segment,
   });
   console.log(`  fetched ${records.length} records`);
 
@@ -405,7 +406,7 @@ async function pauseSequence(config: NicheConfig, seqIndex: number): Promise<voi
   console.log(`${after.status === 'PAUSED' ? '✓ PAUSED' : '? unexpected status'}: ${name} (#${id}) is now ${after.status}`);
 }
 
-// ---------------- clean-caps: fix ALL-CAPS text fields in Airtable ----------------
+// ---------------- clean-caps: fix ALL-CAPS text columns in the lead table ----------------
 
 /**
  * The ALL-CAPS source fields to title-case, each with the transform that fits it.
@@ -413,7 +414,7 @@ async function pauseSequence(config: NicheConfig, seqIndex: number): Promise<voi
  * URLs, emails, domains, numbers, dates, tags, and website_excerpt are left untouched.
  */
 async function cleanCaps(config: NicheConfig, opts: { apply: boolean; limit: number | null }): Promise<void> {
-  const { fetchRecords, updateRecords } = await import('./engine/airtable');
+  const { fetchLeads, updateLeads } = await import('./engine/db');
   const { titleCaseName, titleCaseCompany, titleCaseCity, titleCaseStreet } = await import('./engine/normalize');
   const fs = await import('node:fs');
 
@@ -432,12 +433,12 @@ async function cleanCaps(config: NicheConfig, opts: { apply: boolean; limit: num
     { field: 'street1', label: 'street1', fn: titleCaseStreet },
     { field: 'website', label: 'website (lowercase)', fn: lowerUrl },
   ];
-  const { baseId, table } = config.airtable;
+  const { table } = config.leads;
 
-  console.log(`\n=== ${config.niche}: CLEAN-CAPS — ${opts.apply ? 'APPLY (writes to Airtable)' : 'DRY RUN (reads only)'} ===`);
-  console.log(`base ${baseId} / "${table}" · fields: ${CLEAN_FIELDS.map((f) => f.field).join(', ')}\n`);
+  console.log(`\n=== ${config.niche}: CLEAN-CAPS — ${opts.apply ? 'APPLY (writes to the database)' : 'DRY RUN (reads only)'} ===`);
+  console.log(`${table} · fields: ${CLEAN_FIELDS.map((f) => f.field).join(', ')}\n`);
 
-  const records = await fetchRecords(baseId, table, { fields: CLEAN_FIELDS.map((f) => f.field) });
+  const records = await fetchLeads(table, { columns: CLEAN_FIELDS.map((f) => f.field) });
   console.log(`fetched ${records.length} records\n`);
 
   const perField = Object.fromEntries(CLEAN_FIELDS.map((f) => [f.field, { changed: 0, samples: [] as string[] }]));
@@ -479,21 +480,37 @@ async function cleanCaps(config: NicheConfig, opts: { apply: boolean; limit: num
   console.log(`\nFull change list written to ${file} (gitignored).`);
 
   if (!opts.apply) {
-    console.log(`\nDRY RUN — nothing written. Re-run with --apply to update Airtable`);
+    console.log(`\nDRY RUN — nothing written. Re-run with --apply to update ${table}`);
     console.log(`(add --limit N to write only the first N records as a test).\n`);
     return;
   }
 
-  console.log(`\nWriting ${scoped.length}${opts.limit != null ? ` (--limit ${opts.limit})` : ''} records to Airtable…`);
-  const done = await updateRecords(baseId, table, scoped, (d, t) => {
-    if (d % 200 === 0 || d === t) console.log(`  …${d}/${t}`);
+  console.log(`\nWriting ${scoped.length}${opts.limit != null ? ` (--limit ${opts.limit})` : ''} records to ${table}…`);
+  const done = await updateLeads(table, scoped, {
+    onProgress: (d, t) => console.log(`  …${d}/${t}`),
   });
-  console.log(`\n✓ updated ${done} records. PATCH only touched the fields above; all other fields untouched.\n`);
+  console.log(`\n✓ updated ${done} records in one transaction. Only the fields above changed; all other columns untouched.\n`);
 }
 
 // ---------------- dispatch ----------------
 
-const [cmd, ...rest] = process.argv.slice(2);
+/** Names from when the leads lived in Airtable. They still work, with a one-line notice. */
+const RENAMED_COMMANDS: Record<string, string> = {
+  'apollo:to-airtable': 'apollo:to-db',
+  'consulti:to-airtable': 'consulti:to-db',
+};
+const RENAMED_FLAGS: Record<string, string> = { '--no-airtable': '--no-dedupe' };
+
+const [rawCmd, ...rawRest] = process.argv.slice(2);
+const renamedCmd = rawCmd === undefined ? undefined : RENAMED_COMMANDS[rawCmd];
+if (renamedCmd) console.log(`note: "${rawCmd}" is now "${renamedCmd}". The old name still works.`);
+const cmd = renamedCmd ?? rawCmd;
+const rest = rawRest.map((token) => {
+  const renamed = RENAMED_FLAGS[token];
+  if (!renamed) return token;
+  console.log(`note: "${token}" is now "${renamed}". The old flag still works.`);
+  return renamed;
+});
 
 /** Resolve --niche <name> from the registry (default: financial_advisors, backward compat). */
 function activeNiche(args: string[]): NicheConfig {
@@ -505,6 +522,40 @@ function activeNiche(args: string[]): NicheConfig {
     process.exit(1);
   }
   return config;
+}
+
+/** --table <niche_leads.name>[,<niche_leads.name>] (a bare name like "legal" also works), or the
+ *  fallback. --base, --workspace and --base-name named Airtable places, so they're refused with a
+ *  pointer to --table instead of being guessed. */
+function leadTablesOpt(args: string[], fallback: LeadTable[]): LeadTable[] {
+  for (const flag of ['--base', '--workspace', '--base-name']) {
+    if (args.includes(flag)) {
+      console.log(`${flag} is retired: leads live in Postgres now. Pass --table <${LEAD_TABLES.join(' | ')}>.`);
+      process.exit(1);
+    }
+  }
+  const i = args.indexOf('--table');
+  if (i < 0) return fallback;
+  try {
+    return (args[i + 1] ?? '').split(',').map((t) => parseLeadTable(t.trim()));
+  } catch (err) {
+    console.log((err as Error).message);
+    process.exit(1);
+  }
+}
+
+/** One table from --table, or the fallback. With no fallback, the command refuses to run without --table. */
+function leadTableOpt(args: string[], fallback?: LeadTable): LeadTable {
+  const tables = leadTablesOpt(args, fallback ? [fallback] : []);
+  if (!tables.length) {
+    console.log(`This command has no default table. Pass --table <${LEAD_TABLES.join(' | ')}>.`);
+    process.exit(1);
+  }
+  if (tables.length !== 1) {
+    console.log('--table takes a single table for this command.');
+    process.exit(1);
+  }
+  return tables[0]!;
 }
 
 switch (cmd) {
@@ -546,7 +597,7 @@ switch (cmd) {
   case 'clean-caps': {
     const li = rest.indexOf('--limit');
     const limit = li >= 0 ? Number(rest[li + 1]) : null;
-    // FA-only on purpose: CLEAN_FIELDS names FA Airtable fields that don't exist in other bases.
+    // FA-only on purpose: CLEAN_FIELDS names financial_advisors columns that the other lead tables don't have.
     await cleanCaps(NICHES['financial_advisors']!, { apply: rest.includes('--apply'), limit });
     break;
   }
@@ -624,23 +675,23 @@ switch (cmd) {
     parseUrl(rest[0]);
     break;
   }
-  case 'apollo:to-airtable': {
-    const { ingest } = await import('./apollo/airtable');
+  case 'apollo:to-db': {
+    const { ingest } = await import('./apollo/ingest');
     const key = rest[0] && !rest[0].startsWith('--') ? rest[0] : 'marketing_agencies_1';
     const opt = (flag: string) => { const i = rest.indexOf(flag); return i >= 0 ? rest[i + 1] : undefined; };
     const lim = opt('--limit');
     await ingest(key, {
-      workspaceId: opt('--workspace'),
-      baseId: opt('--base'),
-      table: opt('--table') ?? 'Leads',
-      baseName: opt('--base-name') ?? 'Marketing Agency Leads',
+      // No default table: this writes to live leads. The old apollo:to-airtable wrote nowhere until it
+      // was given a destination, so its alias mustn't start writing to the live table without one.
+      table: leadTableOpt(rest),
       searchName: opt('--search-name') ?? 'Marketing Agencies 1',
       limit: lim != null ? Number(lim) : undefined,
+      skipPruneCheck: rest.includes('--skip-prune-check'),
     });
     break;
   }
 
-  // ---- verify: re-check Airtable emails with ZeroBounce, overwrite email_status ----
+  // ---- verify: re-check lead emails with ZeroBounce, overwrite email_status ----
   case 'verify:export': {
     const { exportApproved } = await import('./verify/emails');
     const opt = (flag: string) => { const i = rest.indexOf(flag); return i >= 0 ? rest[i + 1] : undefined; };
@@ -648,8 +699,7 @@ switch (cmd) {
     const statuses = (opt('--statuses') ?? 'valid').split(',').map((s) => s.trim()).filter(Boolean);
     const today = new Date().toISOString().slice(0, 10);
     await exportApproved({
-      baseId: opt('--base') ?? 'appGzk9z2io4dPJUB',
-      table: opt('--table') ?? 'Leads',
+      table: leadTableOpt(rest, 'niche_leads.marketing_agencies'),
       statuses,
       out: opt('--out') ?? `marketing-agencies-approved-${today}.csv`,
     });
@@ -666,8 +716,7 @@ switch (cmd) {
     const lim = opt('--limit');
     const conc = opt('--concurrency');
     await verifyEmails({
-      baseId: opt('--base') ?? 'appGzk9z2io4dPJUB',
-      table: opt('--table') ?? 'Leads',
+      table: leadTableOpt(rest, 'niche_leads.marketing_agencies'),
       apply: rest.includes('--apply'),
       reset: rest.includes('--reset'),
       limit: lim != null ? Number(lim) : null,
@@ -688,8 +737,7 @@ switch (cmd) {
     const lim = opt('--limit');
     const conc = opt('--concurrency');
     await consultiVerify({
-      baseId: opt('--base') ?? 'appGzk9z2io4dPJUB',
-      table: opt('--table') ?? 'Leads',
+      table: leadTableOpt(rest, 'niche_leads.marketing_agencies'),
       apply: rest.includes('--apply'),
       limit: lim != null ? Number(lim) : null,
       concurrency: conc != null ? Number(conc) : 5,
@@ -719,17 +767,19 @@ switch (cmd) {
     }
     break;
   }
-  case 'consulti:to-airtable': {
-    const { toAirtable } = await import('./consulti/airtable');
+  case 'consulti:to-db': {
+    const { toDb } = await import('./consulti/ingest');
     const opt = (flag: string) => { const i = rest.indexOf(flag); return i >= 0 ? rest[i + 1] : undefined; };
     const file = opt('--file');
-    if (!file) { console.log('usage: consulti:to-airtable --file <approved.csv> [--base <appId>] [--table Leads] [--limit N]'); process.exit(1); }
+    if (!file) { console.log('usage: consulti:to-db --file <approved.csv> --table <lead table> [--limit N] [--skip-prune-check]'); process.exit(1); }
     const lim = opt('--limit');
-    await toAirtable({
+    await toDb({
       file,
-      baseId: opt('--base') ?? 'appGzk9z2io4dPJUB',
-      table: opt('--table') ?? 'Leads',
+      // No default table: this writes to live leads, and the old default sent every file to
+      // niche_leads.marketing_agencies, whatever niche the file held.
+      table: leadTableOpt(rest),
       limit: lim != null ? Number(lim) : undefined,
+      skipPruneCheck: rest.includes('--skip-prune-check'),
     });
     break;
   }
@@ -749,23 +799,19 @@ switch (cmd) {
     const { clean } = await import('./consulti/clean');
     const opt = (flag: string) => { const i = rest.indexOf(flag); return i >= 0 ? rest[i + 1] : undefined; };
     const file = opt('--file');
-    if (!file) { console.log('usage: consulti:clean --file <raw.csv> [--ruleset marketing|advisors] [--base <appId> --table <T> | --no-airtable] [--skip-web] [--concurrency N]'); process.exit(1); }
+    if (!file) { console.log('usage: consulti:clean --file <raw.csv> [--ruleset marketing|advisors] [--table <lead table>[,<lead table>] | --no-dedupe] [--skip-web] [--concurrency N]'); process.exit(1); }
     const ruleset = opt('--ruleset') ?? 'marketing';
-    // Per-ruleset dedupe defaults: marketing dedupes against the Apollo leads table; advisors
-    // against BOTH the registration-scraped list (Table 1, already in live campaigns) and the
-    // Consulti Leads table it feeds (idempotent re-cleans).
-    const defaultDedupe =
+    // Per-ruleset dedupe defaults: marketing dedupes against niche_leads.marketing_agencies; advisors
+    // against BOTH the registration-scraped list (niche_leads.financial_advisors, already in live
+    // campaigns) and the Consulti table it feeds (idempotent re-cleans).
+    const defaultDedupe: LeadTable[] =
       ruleset === 'advisors'
-        ? [
-            { baseId: 'appvEVgfYvyNIms2h', table: 'Table 1' },
-            { baseId: 'appvEVgfYvyNIms2h', table: 'Consulti Leads' },
-          ]
-        : [{ baseId: 'appGzk9z2io4dPJUB', table: 'Leads' }];
-    const base = opt('--base');
+        ? ['niche_leads.financial_advisors', 'niche_leads.financial_advisors_consulti']
+        : ['niche_leads.marketing_agencies'];
     await clean({
       file,
       ruleset,
-      dedupe: rest.includes('--no-airtable') ? [] : base ? [{ baseId: base, table: opt('--table') ?? 'Leads' }] : defaultDedupe,
+      dedupe: rest.includes('--no-dedupe') ? [] : leadTablesOpt(rest, defaultDedupe),
       skipWeb: rest.includes('--skip-web'),
       concurrency: Number(opt('--concurrency') ?? 20),
     });
@@ -778,11 +824,23 @@ switch (cmd) {
         '                       | fleet:audit [--fix] [--if-stale] | free-credits [--delete] | clean-caps [--apply] [--limit N]\n' +
         '                       | infra:domains [--count N] | infra:connect --file <domains.txt> [--apply] | infra:nameservers --file <csv> [--apply] | infra:inboxes [--file <csv>] [--apply] | infra:dns --file <records.json> [--apply] | infra:workspaces\n' +
         '                       | apollo:count [search] | apollo:ids [search] [--refresh] [--passes N] | apollo:export [search] [--files M | --all] [--refresh] [--passes N] | apollo:parse-url "<url>"\n' +
-        '                       | apollo:to-airtable [search] (--workspace <wspId> | --base <appId>) [--table Leads] [--base-name "..."]\n' +
-        '                       | verify:credits | verify:emails [--apply] [--reset] [--limit N] [--concurrency N] [--base <appId>] [--table Leads]\n' +
-        '                       | verify:export [--statuses valid,catch-all] [--out <file.csv>] [--base <appId>] [--table Leads]\n' +
-        '                       | consulti:credits | consulti:verify [--apply] [--limit N] [--concurrency N] [--base <appId>] [--table Leads] | consulti:ledger [--backfill] | consulti:pull --search <key> [--count N] [--slice <key>]\n' +
-        '                       | consulti:clean --file <raw.csv> [--ruleset marketing|advisors] [--base <appId> | --no-airtable] [--skip-web] [--concurrency N]>',
+        '                       | apollo:to-db [search] --table <lead table> [--search-name "..."] [--limit N] [--skip-prune-check]\n' +
+        '                       | verify:credits | verify:emails [--apply] [--reset] [--limit N] [--concurrency N] [--table <lead table>]\n' +
+        '                       | verify:export [--statuses valid,catch-all] [--out <file.csv>] [--table <lead table>]\n' +
+        '                       | consulti:credits | consulti:verify [--apply] [--limit N] [--concurrency N] [--table <lead table>] | consulti:ledger [--backfill] | consulti:pull --search <key> [--count N] [--slice <key>]\n' +
+        '                       | consulti:to-db --file <approved.csv> --table <lead table> [--limit N] [--skip-prune-check] | consulti:prune [--niche all|<key,...>] [--apply] [--skip-web] [--concurrency N]\n' +
+        '                       | consulti:clean --file <raw.csv> [--ruleset marketing|advisors] [--table <lead table>[,...] | --no-dedupe] [--skip-web] [--concurrency N]>\n' +
+        `  lead tables: ${LEAD_TABLES.join(', ')}`,
     );
     process.exit(1);
+}
+
+// Close the database pool (a no-op when the command never touched it) so the process exits right away.
+// A checkout whose npm install predates pipeline-db can't load the db module at all. A command that
+// needed the database has already stopped with that error, so here it's ignored, and commands that
+// never touch the database (preview, the SmartLead and infra commands) still finish cleanly.
+try {
+  await (await import('./engine/db')).closeLeadStore();
+} catch (err) {
+  if ((err as { code?: string }).code !== 'ERR_MODULE_NOT_FOUND') throw err;
 }

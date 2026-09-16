@@ -1,15 +1,17 @@
-// Post-load garbage sweep over the per-niche Airtable bases — checks the clean pass can't do
+// Post-load garbage sweep over the per-niche lead tables (niche_leads.*) — checks the clean pass can't do
 // (or didn't): signals that only exist once the whole cohort is loaded (duplicate companies,
 // cross-niche collisions) plus a homepage CONTENT pass (clean only checked the site answers;
 // this reads what it says).
 //
-// Removals (deleted with --apply, always archived to consulti-pruned-<date>.csv first):
+// Removals (deleted with --apply, always archived to consulti-pruned-<date>.csv first). Keep the
+// archive files: consulti:to-db and apollo:to-db read them so they never add a pruned lead back
+// (see prune-archive.ts).
 //   role-email     info@/office@/frontdesk@… — gatekeeper inboxes; ZB flags them do_not_mail
 //                  anyway, deleting now saves verification credits
 //   disposable     throwaway mail providers
 //   dup-domain     2nd..Nth contact at the same company domain — one pitch per firm; the best
 //                  title is kept (partners at the same firm compare notes)
-//   x-niche-email  same email loaded into an earlier niche base (would get two pitches)
+//   x-niche-email  same email loaded into an earlier niche table (would get two pitches)
 //   parked-domain  homepage is a domain-parking / for-sale page (responds 200, so the
 //                  dead-site check can't see it)
 //
@@ -17,19 +19,15 @@
 //   keyword-miss     homepage loads real text but contains zero niche-relevant keywords
 //   placeholder-site "coming soon" / "under construction" shell
 //   unreachable      site answered during clean but not now (transient until proven dead)
-//   x-niche-domain   same company domain appears in two niche bases (different people)
+//   x-niche-domain   same company domain appears in two niche tables (different people)
 //   bad-first-name   blank/1-char/non-name first_name — personalization would look broken
 import fs from 'node:fs';
-import { env } from '../env';
+import { deleteLeads, fetchLeads, updateLeads, type LeadTable } from '../engine/db';
 import { csvCell } from './pull';
-
-const API = 'https://api.airtable.com/v0';
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export interface PruneNiche {
   key: string;
-  baseId: string;
-  table: string;
+  table: LeadTable;
   /** Homepage must contain at least one of these (lowercase substrings) or the row is
    *  flagged keyword-miss. Generous on purpose: a false KEEP is cheap, a false flag wastes
    *  review time. */
@@ -37,9 +35,9 @@ export interface PruneNiche {
   /** Domains many DIFFERENT businesses legitimately share (BD parent brands) — exempt from
    *  dup-domain grouping and homepage judgment, like freemail. */
   sharedDomains?: string[];
-  /** Extra Airtable fields to fetch for this niche only (requesting a field a base doesn't
-   *  have 422s, so per-niche opt-in). */
-  extraFields?: string[];
+  /** Extra columns to fetch for this niche only (asking for a column a table doesn't have is an
+   *  error, so it's a per-niche opt-in). */
+  extraColumns?: string[];
   /** 'flag' = report same-firm extras but never delete; 'off' = don't even flag. Advisors
    *  are 'off' (Casey, 2026-07-10): the offer is a per-ADVISOR YouTube channel and the
    *  mid-size RIA thesis deliberately targets several advisors per firm — "the more shots
@@ -49,51 +47,52 @@ export interface PruneNiche {
 
 export const PRUNE_NICHES: PruneNiche[] = [
   {
-    key: 'legal', baseId: 'app8n1wbsUWA2gz2d', table: 'Leads',
+    key: 'legal', table: 'niche_leads.legal',
     keywords: ['law', 'legal', 'attorn', 'litigat', 'counsel', 'paralegal', 'estate', 'injur',
       'divorce', 'immigra', 'bankrupt', 'trademark', 'patent', 'defense', 'defence', 'court',
       'justice', 'mediat', 'notary', 'title', 'closing'],
   },
   {
-    key: 'accounting', baseId: 'app2hlEL7sBTl5wcK', table: 'Leads',
+    key: 'accounting', table: 'niche_leads.accounting',
     keywords: ['account', 'cpa', 'tax', 'bookkeep', 'audit', 'payroll', 'quickbooks', 'irs',
       'cfo', 'financ', 'advisory', 'enrolled agent', 'ledger', 'controller'],
   },
   {
-    key: 'health', baseId: 'appxifYj6Do6jfYGR', table: 'Leads',
+    key: 'health', table: 'niche_leads.health_clinics',
     keywords: ['clinic', 'patient', 'medical', 'health', 'therap', 'wellness', 'doctor',
       'physician', 'dental', 'dentist', 'dermatol', 'pediatric', 'psychiatr', 'psycholog',
       'counseling', 'counselling', 'chiroprac', 'acupunct', 'treatment', 'care', 'nurse',
       'surg', 'orthop', 'cardio', 'appointment', 'medicine', 'recovery', 'rehab', 'hospice'],
   },
   {
-    key: 'consulting', baseId: 'app5OHPgae9dTLSCD', table: 'Leads',
+    key: 'consulting', table: 'niche_leads.management_consulting',
     keywords: ['consult', 'advis', 'strateg', 'coach', 'management', 'leadership',
       'transformation', 'operations', 'growth', 'improvement', 'organizational', 'executive',
       'facilitat', 'training', 'solutions', 'expertise', 'clients'],
   },
   {
-    // Mixed Apollo + Consulti base (the 11.5k marketing-agency pool).
-    key: 'marketing', baseId: 'appGzk9z2io4dPJUB', table: 'Leads',
+    // Mixed Apollo + Consulti table (the 11.5k marketing-agency pool).
+    key: 'marketing', table: 'niche_leads.marketing_agencies',
     keywords: ['marketing', 'advertis', 'brand', 'agenc', 'creativ', 'design', 'media', 'seo',
       'social', 'digital', 'public relations', 'communication', 'studio', 'web', 'content',
       'strateg', 'campaign', 'growth', 'video', 'graphic', 'ppc', 'commerce', 'funnel', 'lead'],
   },
   {
-    key: 'staffing', baseId: 'appi362RoZ7vi2Hsd', table: 'Leads',
+    key: 'staffing', table: 'niche_leads.staffing_recruiting',
     keywords: ['staffing', 'recruit', 'talent', 'search', 'placement', 'personnel', 'headhunt',
       'executive search', 'hiring', 'candidates', 'careers', 'jobs', 'workforce', 'employment',
       'human resources', 'hr ', 'temp'],
   },
   {
-    // Consulti-discovered advisors ONLY ("Consulti Leads"). Table 1 (registration-scraped,
-    // already in live campaigns) is deliberately NOT a prune target.
-    key: 'advisors', baseId: 'appvEVgfYvyNIms2h', table: 'Consulti Leads',
+    // Consulti-discovered advisors ONLY (niche_leads.financial_advisors_consulti).
+    // niche_leads.financial_advisors (registration-scraped, already in live campaigns) is
+    // deliberately NOT a prune target.
+    key: 'advisors', table: 'niche_leads.financial_advisors_consulti',
     keywords: ['financial', 'advisor', 'adviser', 'wealth', 'retire', 'invest', 'planning',
       'planner', 'fiduciary', 'cfp', 'portfolio', 'asset', 'capital', 'insurance', 'estate',
       'tax', '401', 'ira', 'income', 'securities', 'fee-only'],
     sharedDomains: ['raymondjames.com', 'lpl.com', 'lplfinancial.com', 'cir2.com', 'joincambridge.com'],
-    extraFields: ['segment'],
+    extraColumns: ['segment'],
     dupDomain: 'off',
   },
 ];
@@ -122,55 +121,13 @@ const FREEMAIL = new Set([
 const PARKED = /(domain|website) ?(is|may be)? ?for ?sale|buy this domain|purchase this domain|hugedomains|sedoparking|\bafternic\b|parked free|domain parking|this domain has expired|godaddy auctions|is parked|domainmarket\.com/i;
 const PLACEHOLDER = /coming soon|under construction|site is being built|launching soon|default web ?site page|plesk|cpanel/i;
 
-const rowUrl = (baseId: string, table: string) => `${API}/${baseId}/${encodeURIComponent(table)}`;
-
-async function req<T>(method: string, url: string, body?: unknown, attempt = 0): Promise<T> {
-  const res = await fetch(url, {
-    method,
-    headers: {
-      Authorization: `Bearer ${env.AIRTABLE_PAT}`,
-      ...(body !== undefined && { 'Content-Type': 'application/json' }),
-    },
-    body: body === undefined ? undefined : JSON.stringify(body),
-  });
-  if (res.status === 429 || res.status >= 500) {
-    if (attempt >= 6) throw new Error(`Airtable ${method} ${url} -> ${res.status} after retries`);
-    await sleep(Math.min(30_000, 1000 * 2 ** attempt));
-    return req<T>(method, url, body, attempt + 1);
-  }
-  const text = await res.text();
-  if (!res.ok) throw new Error(`Airtable ${method} -> ${res.status}: ${text.slice(0, 300)}`);
-  return JSON.parse(text) as T;
-}
-
 interface Rec { id: string; f: Record<string, string> }
 const FIELDS = ['email', 'first_name', 'last_name', 'title', 'company', 'domain', 'search_name'];
 
 async function fetchAll(n: PruneNiche): Promise<Rec[]> {
-  const out: Rec[] = [];
-  let offset: string | undefined;
-  do {
-    const url = new URL(rowUrl(n.baseId, n.table));
-    url.searchParams.set('pageSize', '100');
-    for (const f of [...FIELDS, ...(n.extraFields ?? [])]) url.searchParams.append('fields[]', f);
-    if (offset) url.searchParams.set('offset', offset);
-    const data = await req<{ records: { id: string; fields: Record<string, string> }[]; offset?: string }>('GET', url.toString());
-    for (const r of data.records) out.push({ id: r.id, f: r.fields });
-    offset = data.offset;
-  } while (offset);
-  return out;
-}
-
-async function deleteRecords(n: PruneNiche, ids: string[]): Promise<number> {
-  let deleted = 0;
-  for (let i = 0; i < ids.length; i += 10) {
-    const url = new URL(rowUrl(n.baseId, n.table));
-    for (const id of ids.slice(i, i + 10)) url.searchParams.append('records[]', id);
-    const r = await req<{ records: { deleted: boolean }[] }>('DELETE', url.toString());
-    deleted += r.records.filter((x) => x.deleted).length;
-    await sleep(220);
-  }
-  return deleted;
+  const rows = await fetchLeads(n.table, { columns: [...FIELDS, ...(n.extraColumns ?? [])] });
+  // Every column read here is a text column, so each value is a string.
+  return rows.map((r) => ({ id: r.id, f: r.fields as Record<string, string> }));
 }
 
 // ---------------- homepage content check ----------------
@@ -309,14 +266,7 @@ function findNameFixes(targets: PruneNiche[], survivors: Map<string, Rec[]>): Na
 }
 
 async function applyNameFixes(n: PruneNiche, fixes: NameFix[]): Promise<number> {
-  let updated = 0;
-  for (let i = 0; i < fixes.length; i += 10) {
-    const records = fixes.slice(i, i + 10).map((x) => ({ id: x.rec.id, fields: { first_name: x.to } }));
-    const r = await req<{ records: unknown[] }>('PATCH', rowUrl(n.baseId, n.table), { records });
-    updated += r.records.length;
-    await sleep(220);
-  }
-  return updated;
+  return updateLeads(n.table, fixes.map((x) => ({ id: x.rec.id, fields: { first_name: x.to } })));
 }
 
 /** Higher = better contact to keep when a domain has several. */
@@ -333,7 +283,7 @@ export async function prune(opts: PruneOpts): Promise<void> {
     console.log(`no niches matched (valid: ${PRUNE_NICHES.map((n) => n.key).join(', ')}, or "all")`);
     process.exit(1);
   }
-  console.log(`=== consulti:prune — ${opts.apply ? 'APPLY (deletes from Airtable, archived first)' : 'DRY RUN (no deletes)'} ===`);
+  console.log(`=== consulti:prune — ${opts.apply ? 'APPLY (deletes from the database, archived first)' : 'DRY RUN (no deletes)'} ===`);
   console.log(`niches: ${targets.map((n) => n.key).join(', ')} · web pass: ${opts.skipWeb ? 'OFF' : `on (concurrency ${opts.concurrency})`}\n`);
 
   type Marked = { niche: PruneNiche; rec: Rec; reason: string };
@@ -346,7 +296,7 @@ export async function prune(opts: PruneOpts): Promise<void> {
   const domainOwner = new Map<string, string>(); // domain -> first niche that claimed it
   for (const n of targets) {
     const recs = await fetchAll(n);
-    console.log(`[${n.key}] ${recs.length} records in ${n.baseId}/${n.table}`);
+    console.log(`[${n.key}] ${recs.length} records in ${n.table}`);
     let pool: Rec[] = [];
 
     for (const r of recs) {
@@ -467,7 +417,7 @@ export async function prune(opts: PruneOpts): Promise<void> {
   console.log('');
   for (const n of targets) {
     const ids = removals.filter((m) => m.niche.key === n.key).map((m) => m.rec.id);
-    if (ids.length) console.log(`[${n.key}] deleted ${await deleteRecords(n, ids)}/${ids.length} from ${n.baseId}`);
+    if (ids.length) console.log(`[${n.key}] deleted ${await deleteLeads(n.table, ids)}/${ids.length} from ${n.table}`);
     const fx = nameFixes.filter((f) => f.niche.key === n.key);
     if (fx.length) console.log(`[${n.key}] fixed ${await applyNameFixes(n, fx)}/${fx.length} first names`);
     if (!ids.length && !fx.length) console.log(`[${n.key}] nothing to change`);

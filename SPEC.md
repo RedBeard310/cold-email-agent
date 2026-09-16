@@ -4,6 +4,11 @@
 > mapping, and per-campaign mechanics are worked out as the project is built. This document
 > defines *what the project is and how it's shaped* — not the exact email flow.
 
+> **Storage update, 2026-09-13.** Leads no longer live in Airtable, and the Airtable account is
+> canceled. They're in Postgres: one table per niche in the `niche_leads` schema of the `pipeline`
+> database, with the raw Airtable export kept in `archive.airtable_records`. The lines below that
+> say where leads live, and how they're reached, now describe Postgres. The rest is the original spec.
+
 ---
 
 ## 1. What this is
@@ -27,14 +32,14 @@ outreach. It does **not** discover or enrich leads — that happens upstream (se
 ```
   [ discovery + enrichment repos ]        [ THIS PROJECT ]              [ SmartLead ]
    one per niche, e.g.                      cold-email-agent             account + inboxes
-   finance-lead-finder  ───►  Airtable  ───►  read niche's leads  ───►  sequence + send + warm
-   (RIA advisors)            (per-niche base)   push to campaign(s)      rotate inboxes, replies
+   finance-lead-finder  ───►  Postgres  ───►  read niche's leads  ───►  sequence + send + warm
+   (RIA advisors)            (niche_leads.*)    push to campaign(s)      rotate inboxes, replies
 ```
 
 - **Upstream (separate projects):** each niche has its own discovery/enrichment pipeline that
-  produces a verified lead list in **its own Airtable base**. For the financial-advisor niche
-  that upstream project is **`finance-lead-finder`**.
-- **This project (`cold-email-agent`):** reads a niche's leads from Airtable, maps fields to
+  produces a verified lead list. The list lives in **its own Postgres table** (`niche_leads.<name>`).
+  For the financial-advisor niche that upstream project is **`finance-lead-finder`**.
+- **This project (`cold-email-agent`):** reads a niche's leads from Postgres, maps fields to
   SmartLead personalization variables, and pushes them into the right SmartLead campaign(s).
 - **SmartLead:** owns the actual sequencing, sending, inbox rotation, warmup, and reply
   detection.
@@ -48,14 +53,14 @@ The whole design rests on one idea: **niche-agnostic core, niche-specific config
 ### Core engine (knows nothing about any vertical)
 - SmartLead API client (auth, campaigns, leads, status).
 - Env/secret wiring (pulls keys from the shared **`env-storage`** repo).
-- Lead loading from a source (Airtable).
+- Lead loading from a source (Postgres).
 - Field → SmartLead personalization-variable mapping.
 - Suppression / dedup / do-not-contact handling.
 - (Optional, later) status sync back to the source.
 
 ### Niche config (one per target category)
 Each niche is a small, self-contained config that declares:
-- **Lead source** — its own Airtable base/table.
+- **Lead source:** its own Postgres table.
 - **Field mapping** — which lead fields fill which SmartLead variables.
 - **SmartLead campaign(s)** — where this niche's leads go.
 - **Offer / angle** — the pitch for this audience.
@@ -73,8 +78,9 @@ The first and currently only fully-defined niche.
   YouTube channel** — that's the point.
 - **Offer / angle:** sell them on **starting / using YouTube** to attract clients (Content Gets
   Clients' core offer). The angle is "you should be on YouTube," *not* "you already have YouTube."
-- **Lead source:** Airtable base **`appvEVgfYvyNIms2h`** — **4,565 verified leads** produced by
-  `finance-lead-finder`.
+- **Lead source:** Postgres table **`niche_leads.financial_advisors`**, holding **4,565 verified
+  leads** produced by `finance-lead-finder`. They were copied from Airtable base `appvEVgfYvyNIms2h`
+  on 2026-09-13.
 - **Fields available on each lead** (for personalization / segmentation):
   `legal_name`, `primary_name`, `owner_first_name`, `owner_last_name`, `email`,
   `email_origin` (`scraped` vs `constructed`), `verification_status`, `tags`
@@ -91,16 +97,16 @@ The first and currently only fully-defined niche.
 
 ## 5. Future niches (acknowledged, not yet defined)
 
-Placeholders only. Each will get its own upstream lead database (Airtable base) and its own niche
-config when its turn comes:
+Placeholders only. Each will get its own upstream lead source, its own Postgres table, and its own
+niche config when its turn comes:
 
 - Relocation experts
 - Legal professionals
 - Doctors / dentists
 - …others as identified
 
-The architecture in §3 must make adding these trivial: new Airtable base + new niche config, same
-engine, same SmartLead account.
+The architecture in §3 must make adding these trivial: new lead table (a SQL migration) + new niche
+config, same engine, same SmartLead account.
 
 ---
 
@@ -118,12 +124,15 @@ engine, same SmartLead account.
 
 ---
 
-## 7. Lead source — Airtable
+## 7. Lead source: Postgres
 
-- Leads are read from **Airtable** (one base per niche).
-- A niche config names its **base + table** and the **field map** to SmartLead variables.
-- For `financial_advisors`: base `appvEVgfYvyNIms2h` (created/owned upstream by
-  `finance-lead-finder`). **Airtable PAT** also comes from the shared `env-storage` repo.
+- Leads are read from **Postgres**, one table per niche in the `niche_leads` schema of the
+  `pipeline` database.
+- A niche config names its **table**, an optional SQL **segment**, and the **field map** to
+  SmartLead variables.
+- For `financial_advisors`: `niche_leads.financial_advisors` (built upstream by
+  `finance-lead-finder`). `pipeline-db` finds the connection string in `PIPELINE_DATABASE_URL`,
+  then `DATABASE_URL`, then `/home/casey/.pipeline-db.env` on the VPS.
 
 ---
 
@@ -135,7 +144,7 @@ These are intentionally **not** specified here. Decide them while building:
 - How **copy** is stored and wired into SmartLead per niche.
 - Whether the agent **creates** SmartLead campaigns or pushes into **pre-made** ones.
 - **Scheduling / throttling / daily send caps.**
-- **Reply handling**, positive-reply routing, and **status write-back** to Airtable.
+- **Reply handling**, positive-reply routing, and **status write-back** to the lead table.
 - **Suppression / dedup** across niches and prior sends.
 
 ---
@@ -158,4 +167,5 @@ All secrets are pulled from the shared **`env-storage`** repo
 (`/Users/caseybrown/Claude/env-storage/.env`), consistent with the other projects:
 
 - `SMARTLEAD_API_KEY` — SmartLead account.
-- Airtable PAT — to read per-niche lead bases.
+- `DATABASE_URL`: the Postgres connection string. `pipeline-db` also falls back to
+  `/home/casey/.pipeline-db.env` on the VPS.

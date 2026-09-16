@@ -1,0 +1,1353 @@
+{
+  "generated_by": "scripts/gen-niche-leads-ddl.ts",
+  "exported": "2026-09-13",
+  "tables": [
+    {
+      "table": "niche_leads.financial_advisors",
+      "base_id": "appvEVgfYvyNIms2h",
+      "base_name": "Financial Advisor Leads",
+      "table_id": "tblVJstwRUrWdxM8a",
+      "table_name": "Table 1",
+      "records": 4565,
+      "columns": [
+        {
+          "field": "legal_name",
+          "column": "legal_name",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "crd",
+          "column": "crd",
+          "airtable_type": "number",
+          "pg_type": "bigint",
+          "kind": "integer"
+        },
+        {
+          "field": "registration",
+          "column": "registration",
+          "airtable_type": "singleSelect",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "sec_number",
+          "column": "sec_number",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "primary_name",
+          "column": "primary_name",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "street1",
+          "column": "street1",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "city",
+          "column": "city",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "state",
+          "column": "state",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "postal",
+          "column": "postal",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "phone",
+          "column": "phone",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "website",
+          "column": "website",
+          "airtable_type": "url",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "domain",
+          "column": "domain",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "aum",
+          "column": "aum",
+          "airtable_type": "number",
+          "pg_type": "bigint",
+          "kind": "integer"
+        },
+        {
+          "field": "employees",
+          "column": "employees",
+          "airtable_type": "number",
+          "pg_type": "bigint",
+          "kind": "integer"
+        },
+        {
+          "field": "iar_count",
+          "column": "iar_count",
+          "airtable_type": "number",
+          "pg_type": "bigint",
+          "kind": "integer"
+        },
+        {
+          "field": "total_clients",
+          "column": "total_clients",
+          "airtable_type": "number",
+          "pg_type": "bigint",
+          "kind": "integer"
+        },
+        {
+          "field": "disclosure_flag",
+          "column": "disclosure_flag",
+          "airtable_type": "number",
+          "pg_type": "bigint",
+          "kind": "integer"
+        },
+        {
+          "field": "latest_filing_date",
+          "column": "latest_filing_date",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "b2c_score",
+          "column": "b2c_score",
+          "airtable_type": "number",
+          "pg_type": "double precision",
+          "kind": "float"
+        },
+        {
+          "field": "tags",
+          "column": "tags",
+          "airtable_type": "multipleSelects",
+          "pg_type": "text[]",
+          "kind": "text_array"
+        },
+        {
+          "field": "website_excerpt",
+          "column": "website_excerpt",
+          "airtable_type": "multilineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "owner_first_name",
+          "column": "owner_first_name",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "owner_last_name",
+          "column": "owner_last_name",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "email",
+          "column": "email",
+          "airtable_type": "email",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "email_source",
+          "column": "email_source",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "email_origin",
+          "column": "email_origin",
+          "airtable_type": "singleSelect",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "email_confidence",
+          "column": "email_confidence",
+          "airtable_type": "number",
+          "pg_type": "double precision",
+          "kind": "float"
+        },
+        {
+          "field": "verification_status",
+          "column": "verification_status",
+          "airtable_type": "singleSelect",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "ingest_quarter",
+          "column": "ingest_quarter",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        }
+      ],
+      "dropped": [],
+      "unique_keys": [
+        {
+          "column": "crd",
+          "indexed": true,
+          "duplicate_rows": 0
+        }
+      ]
+    },
+    {
+      "table": "niche_leads.financial_advisors_consulti",
+      "base_id": "appvEVgfYvyNIms2h",
+      "base_name": "Financial Advisor Leads",
+      "table_id": "tblfHcSw6zB9lNWx4",
+      "table_name": "Consulti Leads",
+      "records": 7813,
+      "columns": [
+        {
+          "field": "full_name",
+          "column": "full_name",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "first_name",
+          "column": "first_name",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "last_name",
+          "column": "last_name",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "title",
+          "column": "title",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "email",
+          "column": "email",
+          "airtable_type": "email",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "email_status",
+          "column": "email_status",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "email_sub_status",
+          "column": "email_sub_status",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "email_verified_date",
+          "column": "email_verified_date",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "company",
+          "column": "company",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "domain",
+          "column": "domain",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "website",
+          "column": "website",
+          "airtable_type": "url",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "employees",
+          "column": "employees",
+          "airtable_type": "number",
+          "pg_type": "bigint",
+          "kind": "integer"
+        },
+        {
+          "field": "industry",
+          "column": "industry",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "linkedin_url",
+          "column": "linkedin_url",
+          "airtable_type": "url",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "city",
+          "column": "city",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "state",
+          "column": "state",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "country",
+          "column": "country",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "source",
+          "column": "source",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "search_name",
+          "column": "search_name",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "segment",
+          "column": "segment",
+          "airtable_type": "singleSelect",
+          "pg_type": "text",
+          "kind": "text"
+        }
+      ],
+      "dropped": [],
+      "unique_keys": []
+    },
+    {
+      "table": "niche_leads.marketing_agencies",
+      "base_id": "appGzk9z2io4dPJUB",
+      "base_name": "Marketing Agency Leads",
+      "table_id": "tblUsSKZ4rxXoyb1F",
+      "table_name": "Leads",
+      "records": 10833,
+      "columns": [
+        {
+          "field": "full_name",
+          "column": "full_name",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "first_name",
+          "column": "first_name",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "last_name",
+          "column": "last_name",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "title",
+          "column": "title",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "email",
+          "column": "email",
+          "airtable_type": "email",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "email_status",
+          "column": "email_status",
+          "airtable_type": "singleSelect",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "company",
+          "column": "company",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "domain",
+          "column": "domain",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "website",
+          "column": "website",
+          "airtable_type": "url",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "employees",
+          "column": "employees",
+          "airtable_type": "number",
+          "pg_type": "bigint",
+          "kind": "integer"
+        },
+        {
+          "field": "industry",
+          "column": "industry",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "linkedin_url",
+          "column": "linkedin_url",
+          "airtable_type": "url",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "city",
+          "column": "city",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "state",
+          "column": "state",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "country",
+          "column": "country",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "seniority",
+          "column": "seniority",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "departments",
+          "column": "departments",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "apollo_person_id",
+          "column": "apollo_person_id",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "apollo_org_id",
+          "column": "apollo_org_id",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "source",
+          "column": "source",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "search_name",
+          "column": "search_name",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "email_verified_date",
+          "column": "email_verified_date",
+          "airtable_type": "date",
+          "pg_type": "date",
+          "kind": "date"
+        },
+        {
+          "field": "email_sub_status",
+          "column": "email_sub_status",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        }
+      ],
+      "dropped": [],
+      "unique_keys": [
+        {
+          "column": "apollo_person_id",
+          "indexed": true,
+          "duplicate_rows": 0
+        }
+      ]
+    },
+    {
+      "table": "niche_leads.legal",
+      "base_id": "app8n1wbsUWA2gz2d",
+      "base_name": "Legal Leads",
+      "table_id": "tblxKSyY2Crfnn8KF",
+      "table_name": "Leads",
+      "records": 2592,
+      "columns": [
+        {
+          "field": "full_name",
+          "column": "full_name",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "first_name",
+          "column": "first_name",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "last_name",
+          "column": "last_name",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "title",
+          "column": "title",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "email",
+          "column": "email",
+          "airtable_type": "email",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "email_status",
+          "column": "email_status",
+          "airtable_type": "singleSelect",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "company",
+          "column": "company",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "domain",
+          "column": "domain",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "website",
+          "column": "website",
+          "airtable_type": "url",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "employees",
+          "column": "employees",
+          "airtable_type": "number",
+          "pg_type": "bigint",
+          "kind": "integer"
+        },
+        {
+          "field": "industry",
+          "column": "industry",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "linkedin_url",
+          "column": "linkedin_url",
+          "airtable_type": "url",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "city",
+          "column": "city",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "state",
+          "column": "state",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "country",
+          "column": "country",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "seniority",
+          "column": "seniority",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "departments",
+          "column": "departments",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "apollo_person_id",
+          "column": "apollo_person_id",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "apollo_org_id",
+          "column": "apollo_org_id",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "source",
+          "column": "source",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "search_name",
+          "column": "search_name",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        }
+      ],
+      "dropped": [],
+      "unique_keys": []
+    },
+    {
+      "table": "niche_leads.accounting",
+      "base_id": "app2hlEL7sBTl5wcK",
+      "base_name": "Accounting Leads",
+      "table_id": "tblSc0nA60xuyr72j",
+      "table_name": "Leads",
+      "records": 2521,
+      "columns": [
+        {
+          "field": "full_name",
+          "column": "full_name",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "first_name",
+          "column": "first_name",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "last_name",
+          "column": "last_name",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "title",
+          "column": "title",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "email",
+          "column": "email",
+          "airtable_type": "email",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "email_status",
+          "column": "email_status",
+          "airtable_type": "singleSelect",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "company",
+          "column": "company",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "domain",
+          "column": "domain",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "website",
+          "column": "website",
+          "airtable_type": "url",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "employees",
+          "column": "employees",
+          "airtable_type": "number",
+          "pg_type": "bigint",
+          "kind": "integer"
+        },
+        {
+          "field": "industry",
+          "column": "industry",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "linkedin_url",
+          "column": "linkedin_url",
+          "airtable_type": "url",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "city",
+          "column": "city",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "state",
+          "column": "state",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "country",
+          "column": "country",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "seniority",
+          "column": "seniority",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "departments",
+          "column": "departments",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "apollo_person_id",
+          "column": "apollo_person_id",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "apollo_org_id",
+          "column": "apollo_org_id",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "source",
+          "column": "source",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "search_name",
+          "column": "search_name",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        }
+      ],
+      "dropped": [],
+      "unique_keys": []
+    },
+    {
+      "table": "niche_leads.health_clinics",
+      "base_id": "appxifYj6Do6jfYGR",
+      "base_name": "Health Clinic Leads",
+      "table_id": "tblfoaqeiJQMA8XQC",
+      "table_name": "Leads",
+      "records": 2547,
+      "columns": [
+        {
+          "field": "full_name",
+          "column": "full_name",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "first_name",
+          "column": "first_name",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "last_name",
+          "column": "last_name",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "title",
+          "column": "title",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "email",
+          "column": "email",
+          "airtable_type": "email",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "email_status",
+          "column": "email_status",
+          "airtable_type": "singleSelect",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "company",
+          "column": "company",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "domain",
+          "column": "domain",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "website",
+          "column": "website",
+          "airtable_type": "url",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "employees",
+          "column": "employees",
+          "airtable_type": "number",
+          "pg_type": "bigint",
+          "kind": "integer"
+        },
+        {
+          "field": "industry",
+          "column": "industry",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "linkedin_url",
+          "column": "linkedin_url",
+          "airtable_type": "url",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "city",
+          "column": "city",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "state",
+          "column": "state",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "country",
+          "column": "country",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "seniority",
+          "column": "seniority",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "departments",
+          "column": "departments",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "apollo_person_id",
+          "column": "apollo_person_id",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "apollo_org_id",
+          "column": "apollo_org_id",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "source",
+          "column": "source",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "search_name",
+          "column": "search_name",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        }
+      ],
+      "dropped": [],
+      "unique_keys": []
+    },
+    {
+      "table": "niche_leads.management_consulting",
+      "base_id": "app5OHPgae9dTLSCD",
+      "base_name": "Management Consulting Leads",
+      "table_id": "tblp9W6OORvQUq7nJ",
+      "table_name": "Leads",
+      "records": 2539,
+      "columns": [
+        {
+          "field": "full_name",
+          "column": "full_name",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "first_name",
+          "column": "first_name",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "last_name",
+          "column": "last_name",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "title",
+          "column": "title",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "email",
+          "column": "email",
+          "airtable_type": "email",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "email_status",
+          "column": "email_status",
+          "airtable_type": "singleSelect",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "company",
+          "column": "company",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "domain",
+          "column": "domain",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "website",
+          "column": "website",
+          "airtable_type": "url",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "employees",
+          "column": "employees",
+          "airtable_type": "number",
+          "pg_type": "bigint",
+          "kind": "integer"
+        },
+        {
+          "field": "industry",
+          "column": "industry",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "linkedin_url",
+          "column": "linkedin_url",
+          "airtable_type": "url",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "city",
+          "column": "city",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "state",
+          "column": "state",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "country",
+          "column": "country",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "seniority",
+          "column": "seniority",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "departments",
+          "column": "departments",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "apollo_person_id",
+          "column": "apollo_person_id",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "apollo_org_id",
+          "column": "apollo_org_id",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "source",
+          "column": "source",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "search_name",
+          "column": "search_name",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        }
+      ],
+      "dropped": [],
+      "unique_keys": []
+    },
+    {
+      "table": "niche_leads.staffing_recruiting",
+      "base_id": "appi362RoZ7vi2Hsd",
+      "base_name": "Staffing & Recruiting Leads",
+      "table_id": "tblIzvOhYzeawWwOo",
+      "table_name": "Leads",
+      "records": 2411,
+      "columns": [
+        {
+          "field": "full_name",
+          "column": "full_name",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "first_name",
+          "column": "first_name",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "last_name",
+          "column": "last_name",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "title",
+          "column": "title",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "email",
+          "column": "email",
+          "airtable_type": "email",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "email_status",
+          "column": "email_status",
+          "airtable_type": "singleSelect",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "company",
+          "column": "company",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "domain",
+          "column": "domain",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "website",
+          "column": "website",
+          "airtable_type": "url",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "employees",
+          "column": "employees",
+          "airtable_type": "number",
+          "pg_type": "bigint",
+          "kind": "integer"
+        },
+        {
+          "field": "industry",
+          "column": "industry",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "linkedin_url",
+          "column": "linkedin_url",
+          "airtable_type": "url",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "city",
+          "column": "city",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "state",
+          "column": "state",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "country",
+          "column": "country",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "seniority",
+          "column": "seniority",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "departments",
+          "column": "departments",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "apollo_person_id",
+          "column": "apollo_person_id",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "apollo_org_id",
+          "column": "apollo_org_id",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "source",
+          "column": "source",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        },
+        {
+          "field": "search_name",
+          "column": "search_name",
+          "airtable_type": "singleLineText",
+          "pg_type": "text",
+          "kind": "text"
+        }
+      ],
+      "dropped": [],
+      "unique_keys": []
+    }
+  ]
+}

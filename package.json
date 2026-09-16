@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Generalist send-side cold-email outreach agent: Airtable leads -> SmartLead campaigns, niche-agnostic engine + pluggable niche configs.",
+  "description": "Generalist send-side cold-email outreach agent: niche lead tables in Postgres -> SmartLead campaigns, niche-agnostic engine + pluggable niche configs.",
   "engines": {
     "node": ">=20"
   },
@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "dotenv": "^16.4.7",
+    "pipeline-db": "file:../pipeline-db",
     "zod": "^3.24.1"
   },
   "devDependencies": {

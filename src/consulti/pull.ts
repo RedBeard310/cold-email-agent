@@ -26,7 +26,7 @@ function saveState(s: State): void {
   fs.writeFileSync(STATE_FILE, JSON.stringify(s, null, 2));
 }
 
-// ---------------- CSV (same column set as the Apollo export so Airtable ingest is uniform) ----------------
+// ---------------- CSV (same column set as the Apollo export so the database ingest is uniform) ----------------
 
 export const COLUMNS = [
   'full_name', 'first_name', 'last_name', 'title', 'email', 'email_status', 'email_sub_status',
