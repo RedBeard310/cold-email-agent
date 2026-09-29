@@ -1,4 +1,4 @@
-// Shared reader for the final Airtable export (2026-09-13). Local files only; nothing here calls Airtable.
+// Shared reader for the final the old database export (2026-09-13). Local files only; nothing here calls the old database.
 //
 // Layout: <dir>/<base_id>/_schema.json is the base's Meta API schema, and <dir>/<base_id>/<table_id>.json
 // is {base_id, table_id, table_name, exported_at, records: [{id, createdTime, fields}]}, with empty
@@ -7,7 +7,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
 
-export const EXPORT_DIR = process.argv[2] ?? '/home/casey/.claude/airtable-final-export-2026-09-13';
+export const EXPORT_DIR = process.argv[2] ?? '/home/casey/.claude/legacy-final-export-2026-09-13';
 
 /** The export files carry base ids only, so the names live here. */
 export const BASE_NAMES: Record<string, string> = {
@@ -27,8 +27,8 @@ export const BASE_NAMES: Record<string, string> = {
   appwSwSe8Slw7qAUS: 'Santiago Acevedo — Channel Research',
 };
 
-export interface AirtableField { id: string; name: string; type: string; options?: Record<string, unknown> }
-export interface AirtableTable { id: string; name: string; primaryFieldId: string; fields: AirtableField[] }
+export interface the old databaseField { id: string; name: string; type: string; options?: Record<string, unknown> }
+export interface the old databaseTable { id: string; name: string; primaryFieldId: string; fields: the old databaseField[] }
 export interface ExportRecord { id: string; createdTime?: string; fields: Record<string, unknown> }
 export interface ExportFile {
   base_id: string;
@@ -37,7 +37,7 @@ export interface ExportFile {
   exported_at: string;
   records: ExportRecord[];
 }
-export interface ExportedTable { baseId: string; baseName: string; schema: AirtableTable; path: string }
+export interface ExportedTable { baseId: string; baseName: string; schema: the old databaseTable; path: string }
 
 export function readJson<T>(path: string | URL): T {
   return JSON.parse(readFileSync(path, 'utf8')) as T;
@@ -57,7 +57,7 @@ export function exportedTables(): ExportedTable[] {
     const baseId = basename(dir);
     const baseName = BASE_NAMES[baseId];
     if (!baseName) throw new Error(`No base name for ${baseId}. Add it to BASE_NAMES.`);
-    const { tables } = readJson<{ tables: AirtableTable[] }>(join(dir, '_schema.json'));
+    const { tables } = readJson<{ tables: the old databaseTable[] }>(join(dir, '_schema.json'));
     for (const file of readdirSync(dir).filter((f) => /^tbl[A-Za-z0-9]+\.json$/.test(f)).sort()) {
       const schema = tables.find((t) => `${t.id}.json` === file);
       if (!schema) throw new Error(`${baseId}/${file} has no entry in _schema.json`);
@@ -75,7 +75,7 @@ export function readExport(t: ExportedTable): ExportFile {
   return file;
 }
 
-/** Airtable leaves empty fields out. Missing, null, empty string, and empty list all count as blank. */
+/** the old database leaves empty fields out. Missing, null, empty string, and empty list all count as blank. */
 export function isBlank(v: unknown): boolean {
   return v === undefined || v === null || v === '' || (Array.isArray(v) && v.length === 0);
 }
@@ -87,7 +87,7 @@ export type Kind = 'text' | 'text_array' | 'integer' | 'float' | 'boolean' | 'da
 export interface NicheColumn {
   field: string;
   column: string;
-  airtable_type: string;
+  source_type: string;
   pg_type: string;
   kind: Kind;
   note?: string;
@@ -101,7 +101,7 @@ export interface NicheTable {
   table_name: string;
   records: number;
   columns: NicheColumn[];
-  dropped: { field: string; airtable_type: string; reason: string }[];
+  dropped: { field: string; source_type: string; reason: string }[];
   unique_keys: { column: string; indexed: boolean; duplicate_rows: number }[];
 }
 

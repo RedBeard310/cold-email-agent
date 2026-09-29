@@ -2,7 +2,7 @@
 -- It holds every Airtable record that was not already in Postgres at that point: the 7 cold-email
 -- lead bases, the "CGC - D100 Generation" base, 18 Dream 100 tables from the lead base, and the
 -- 5 deep-research client bases that never reached the research schema.
--- Filled by scripts/load-airtable-export.ts. Apply once:
+-- Filled by scripts/load-legacy-export.ts. Apply once:
 --   psql -v ON_ERROR_STOP=1 -f migrations/0000_archive.sql
 BEGIN;
 

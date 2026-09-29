@@ -1,23 +1,23 @@
-// Checks the Airtable export load against the export files. Read-only: it writes nothing.
+// Checks the old database export load against the export files. Read-only: it writes nothing.
 //   1. Every exported table: archive row counts match the export, and every archived record's
 //      fields and createdTime equal the export exactly.
 //   2. Every niche_leads table: row count and record ids match the export, and 25 random records
 //      match field by field once types are normalized.
-//   3. Every stored field in each niche table's Airtable schema has a column, and the unique
+//   3. Every stored field in each niche table's the old database schema has a column, and the unique
 //      indexes the column map promises exist.
 //   4. What migration 0002 added: the verify columns exist with the right types and are empty, each
 //      email index is a unique index on (email) that ON CONFLICT (email) can use, and no table has a
 //      column that neither the column map nor 0002 explains.
 // Prints counts, ids, and field names only, never values. Exits 1 on any failure.
 //
-//   npx tsx scripts/verify-airtable-load.ts [export_dir]
+//   npx tsx scripts/verify-legacy-load.ts [export_dir]
 import { closePool, query } from 'pipeline-db';
-import { exportedTables, isBlank, nicheTables, readExport, type Kind } from './airtable-export';
+import { exportedTables, isBlank, nicheTables, readExport, type Kind } from './legacy-export';
 
 const SAMPLE_SIZE = 25;
 const COMPUTED = new Set(['formula', 'rollup', 'lookup', 'multipleLookupValues']);
 
-// What migrations/0002_niche_leads_email_keys_verify_columns.sql adds on top of the Airtable schemas.
+// What migrations/0002_niche_leads_email_keys_verify_columns.sql adds on top of the old database schemas.
 const EMAIL_KEY_TABLES = [
   'financial_advisors_consulti', 'marketing_agencies', 'legal', 'accounting',
   'health_clinics', 'management_consulting', 'staffing_recruiting',
@@ -72,11 +72,11 @@ async function main(): Promise<void> {
     const file = readExport(t);
     exportRecords += file.records.length;
     const rows = await query<{ record_id: string; created_time: Date | null; fields: unknown }>(
-      'SELECT record_id, created_time, fields FROM archive.airtable_records WHERE base_id = $1 AND table_id = $2',
+      'SELECT record_id, created_time, fields FROM archive.legacy_export_records WHERE base_id = $1 AND table_id = $2',
       [t.baseId, t.schema.id],
     );
     const [meta] = await query<{ record_count: number; field_schema: unknown }>(
-      'SELECT record_count, field_schema FROM archive.airtable_tables WHERE base_id = $1 AND table_id = $2',
+      'SELECT record_count, field_schema FROM archive.legacy_export_tables WHERE base_id = $1 AND table_id = $2',
       [t.baseId, t.schema.id],
     );
     const byId = new Map(rows.map((r) => [r.record_id, r]));
@@ -95,7 +95,7 @@ async function main(): Promise<void> {
     console.log(`  ${ok ? 'ok  ' : 'FAIL'} ${t.baseId}/${t.schema.id} ${JSON.stringify(t.schema.name)}: export ${file.records.length}, archive ${rows.length}, missing ${missing}, fields differ ${fieldDiffs}, createdTime differs ${timeDiffs}, table row ${schemaOk ? 'ok' : 'wrong or missing'}`);
   }
   const [totals] = await query<{ tables: number; records: number }>(
-    'SELECT (SELECT count(*) FROM archive.airtable_tables) AS tables, (SELECT count(*) FROM archive.airtable_records) AS records',
+    'SELECT (SELECT count(*) FROM archive.legacy_export_tables) AS tables, (SELECT count(*) FROM archive.legacy_export_records) AS records',
   );
   const totalsOk = totals?.tables === tables.length && totals?.records === exportRecords;
   if (!totalsOk) failures++;
@@ -152,7 +152,7 @@ async function main(): Promise<void> {
     const missingIndexes = n.unique_keys.filter((u) => u.indexed && !indexes.has(`${name}_${u.column}_key`));
     const ok = uncovered.length === 0 && missingIndexes.length === 0;
     if (!ok) failures++;
-    const dropped = n.dropped.map((d) => `${d.field} (${d.airtable_type}: ${d.reason})`).join(', ') || 'none';
+    const dropped = n.dropped.map((d) => `${d.field} (${d.source_type}: ${d.reason})`).join(', ') || 'none';
     const keys = n.unique_keys.map((u) => `${u.column} ${u.indexed ? 'indexed' : `skipped, ${u.duplicate_rows} duplicate rows`}`).join(', ') || 'none';
     console.log(`  ${ok ? 'ok  ' : 'FAIL'} ${n.table}: ${stored.length} stored fields, ${stored.length - uncovered.length} have a column; dropped: ${dropped}; unique keys: ${keys}`);
     if (uncovered.length) console.log(`       no column for: ${uncovered.map((f) => f.name).join(', ')}`);

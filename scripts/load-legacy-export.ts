@@ -1,6 +1,6 @@
-// Loads the final Airtable export (2026-09-13) into Postgres. Reads local files only; nothing here
-// calls Airtable.
-//   - Every exported table goes into archive.airtable_tables and archive.airtable_records, as is.
+// Loads the final the old database export (2026-09-13) into Postgres. Reads local files only; nothing here
+// calls the old database.
+//   - Every exported table goes into archive.legacy_export_tables and archive.legacy_export_records, as is.
 //   - The 8 cold-email lead tables also go into their typed niche_leads tables, converted with the
 //     column map in migrations/niche-leads-columns.json.
 // One transaction per table. Every insert is ON CONFLICT (primary key) DO NOTHING, so a rerun skips
@@ -9,9 +9,9 @@
 // Apply migrations/0000_archive.sql and migrations/0001_niche_leads.sql first. 0002 can come before
 // or after the load.
 //
-//   npx tsx scripts/load-airtable-export.ts [export_dir]
+//   npx tsx scripts/load-legacy-export.ts [export_dir]
 import { closePool, getPool } from 'pipeline-db';
-import { exportedTables, isBlank, nicheTables, readExport, type Kind } from './airtable-export';
+import { exportedTables, isBlank, nicheTables, readExport, type Kind } from './legacy-export';
 
 /** The part of a pg client this script uses. */
 interface Client { query(text: string, params?: unknown[]): Promise<{ rowCount: number | null }> }
@@ -82,13 +82,13 @@ async function main(): Promise<void> {
     try {
       await client.query('BEGIN');
       await client.query(
-        `INSERT INTO archive.airtable_tables
+        `INSERT INTO archive.legacy_export_tables
            (base_id, base_name, table_id, table_name, field_schema, record_count, exported_at)
          VALUES ($1, $2, $3, $4, $5::jsonb, $6, $7::timestamptz)
          ON CONFLICT (base_id, table_id) DO NOTHING`,
         [t.baseId, t.baseName, t.schema.id, file.table_name, JSON.stringify(t.schema), file.records.length, file.exported_at],
       );
-      const archived = await insertRows(client, 'archive.airtable_records', 'base_id, table_id, record_id', ARCHIVE_COLUMNS, file.records.map((r) => [
+      const archived = await insertRows(client, 'archive.legacy_export_records', 'base_id, table_id, record_id', ARCHIVE_COLUMNS, file.records.map((r) => [
         t.baseId, t.baseName, t.schema.id, file.table_name, r.id, r.createdTime ?? null, JSON.stringify(r.fields), file.exported_at,
       ]));
 
@@ -102,7 +102,7 @@ async function main(): Promise<void> {
             const value = convert(c.kind, r.fields[c.field]);
             if (value !== MISFIT) return value;
             // The value doesn't fit the column: store NULL (false for a checkbox) and report it.
-            const key = `${target.table}.${c.column} (${c.airtable_type} as ${c.pg_type})`;
+            const key = `${target.table}.${c.column} (${c.source_type} as ${c.pg_type})`;
             const issue = issues.get(key) ?? { count: 0, ids: [] };
             issue.count++;
             if (issue.ids.length < 5) issue.ids.push(r.id);

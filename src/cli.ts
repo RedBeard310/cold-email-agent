@@ -494,12 +494,10 @@ async function cleanCaps(config: NicheConfig, opts: { apply: boolean; limit: num
 
 // ---------------- dispatch ----------------
 
-/** Names from when the leads lived in Airtable. They still work, with a one-line notice. */
+/** Names from when the leads lived in the old database. They still work, with a one-line notice. */
 const RENAMED_COMMANDS: Record<string, string> = {
-  'apollo:to-airtable': 'apollo:to-db',
-  'consulti:to-airtable': 'consulti:to-db',
 };
-const RENAMED_FLAGS: Record<string, string> = { '--no-airtable': '--no-dedupe' };
+const RENAMED_FLAGS: Record<string, string> = {};
 
 const [rawCmd, ...rawRest] = process.argv.slice(2);
 const renamedCmd = rawCmd === undefined ? undefined : RENAMED_COMMANDS[rawCmd];
@@ -525,7 +523,7 @@ function activeNiche(args: string[]): NicheConfig {
 }
 
 /** --table <niche_leads.name>[,<niche_leads.name>] (a bare name like "legal" also works), or the
- *  fallback. --base, --workspace and --base-name named Airtable places, so they're refused with a
+ *  fallback. --base, --workspace and --base-name named the old database places, so they're refused with a
  *  pointer to --table instead of being guessed. */
 function leadTablesOpt(args: string[], fallback: LeadTable[]): LeadTable[] {
   for (const flag of ['--base', '--workspace', '--base-name']) {
@@ -681,7 +679,7 @@ switch (cmd) {
     const opt = (flag: string) => { const i = rest.indexOf(flag); return i >= 0 ? rest[i + 1] : undefined; };
     const lim = opt('--limit');
     await ingest(key, {
-      // No default table: this writes to live leads. The old apollo:to-airtable wrote nowhere until it
+      // No default table: this writes to live leads. The old apollo export wrote nowhere until it
       // was given a destination, so its alias mustn't start writing to the live table without one.
       table: leadTableOpt(rest),
       searchName: opt('--search-name') ?? 'Marketing Agencies 1',

@@ -13,203 +13,203 @@
         {
           "field": "legal_name",
           "column": "legal_name",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "crd",
           "column": "crd",
-          "airtable_type": "number",
+          "source_type": "number",
           "pg_type": "bigint",
           "kind": "integer"
         },
         {
           "field": "registration",
           "column": "registration",
-          "airtable_type": "singleSelect",
+          "source_type": "singleSelect",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "sec_number",
           "column": "sec_number",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "primary_name",
           "column": "primary_name",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "street1",
           "column": "street1",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "city",
           "column": "city",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "state",
           "column": "state",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "postal",
           "column": "postal",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "phone",
           "column": "phone",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "website",
           "column": "website",
-          "airtable_type": "url",
+          "source_type": "url",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "domain",
           "column": "domain",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "aum",
           "column": "aum",
-          "airtable_type": "number",
+          "source_type": "number",
           "pg_type": "bigint",
           "kind": "integer"
         },
         {
           "field": "employees",
           "column": "employees",
-          "airtable_type": "number",
+          "source_type": "number",
           "pg_type": "bigint",
           "kind": "integer"
         },
         {
           "field": "iar_count",
           "column": "iar_count",
-          "airtable_type": "number",
+          "source_type": "number",
           "pg_type": "bigint",
           "kind": "integer"
         },
         {
           "field": "total_clients",
           "column": "total_clients",
-          "airtable_type": "number",
+          "source_type": "number",
           "pg_type": "bigint",
           "kind": "integer"
         },
         {
           "field": "disclosure_flag",
           "column": "disclosure_flag",
-          "airtable_type": "number",
+          "source_type": "number",
           "pg_type": "bigint",
           "kind": "integer"
         },
         {
           "field": "latest_filing_date",
           "column": "latest_filing_date",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "b2c_score",
           "column": "b2c_score",
-          "airtable_type": "number",
+          "source_type": "number",
           "pg_type": "double precision",
           "kind": "float"
         },
         {
           "field": "tags",
           "column": "tags",
-          "airtable_type": "multipleSelects",
+          "source_type": "multipleSelects",
           "pg_type": "text[]",
           "kind": "text_array"
         },
         {
           "field": "website_excerpt",
           "column": "website_excerpt",
-          "airtable_type": "multilineText",
+          "source_type": "multilineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "owner_first_name",
           "column": "owner_first_name",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "owner_last_name",
           "column": "owner_last_name",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "email",
           "column": "email",
-          "airtable_type": "email",
+          "source_type": "email",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "email_source",
           "column": "email_source",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "email_origin",
           "column": "email_origin",
-          "airtable_type": "singleSelect",
+          "source_type": "singleSelect",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "email_confidence",
           "column": "email_confidence",
-          "airtable_type": "number",
+          "source_type": "number",
           "pg_type": "double precision",
           "kind": "float"
         },
         {
           "field": "verification_status",
           "column": "verification_status",
-          "airtable_type": "singleSelect",
+          "source_type": "singleSelect",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "ingest_quarter",
           "column": "ingest_quarter",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         }
@@ -234,140 +234,140 @@
         {
           "field": "full_name",
           "column": "full_name",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "first_name",
           "column": "first_name",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "last_name",
           "column": "last_name",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "title",
           "column": "title",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "email",
           "column": "email",
-          "airtable_type": "email",
+          "source_type": "email",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "email_status",
           "column": "email_status",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "email_sub_status",
           "column": "email_sub_status",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "email_verified_date",
           "column": "email_verified_date",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "company",
           "column": "company",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "domain",
           "column": "domain",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "website",
           "column": "website",
-          "airtable_type": "url",
+          "source_type": "url",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "employees",
           "column": "employees",
-          "airtable_type": "number",
+          "source_type": "number",
           "pg_type": "bigint",
           "kind": "integer"
         },
         {
           "field": "industry",
           "column": "industry",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "linkedin_url",
           "column": "linkedin_url",
-          "airtable_type": "url",
+          "source_type": "url",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "city",
           "column": "city",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "state",
           "column": "state",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "country",
           "column": "country",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "source",
           "column": "source",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "search_name",
           "column": "search_name",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "segment",
           "column": "segment",
-          "airtable_type": "singleSelect",
+          "source_type": "singleSelect",
           "pg_type": "text",
           "kind": "text"
         }
@@ -386,161 +386,161 @@
         {
           "field": "full_name",
           "column": "full_name",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "first_name",
           "column": "first_name",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "last_name",
           "column": "last_name",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "title",
           "column": "title",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "email",
           "column": "email",
-          "airtable_type": "email",
+          "source_type": "email",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "email_status",
           "column": "email_status",
-          "airtable_type": "singleSelect",
+          "source_type": "singleSelect",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "company",
           "column": "company",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "domain",
           "column": "domain",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "website",
           "column": "website",
-          "airtable_type": "url",
+          "source_type": "url",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "employees",
           "column": "employees",
-          "airtable_type": "number",
+          "source_type": "number",
           "pg_type": "bigint",
           "kind": "integer"
         },
         {
           "field": "industry",
           "column": "industry",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "linkedin_url",
           "column": "linkedin_url",
-          "airtable_type": "url",
+          "source_type": "url",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "city",
           "column": "city",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "state",
           "column": "state",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "country",
           "column": "country",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "seniority",
           "column": "seniority",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "departments",
           "column": "departments",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "apollo_person_id",
           "column": "apollo_person_id",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "apollo_org_id",
           "column": "apollo_org_id",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "source",
           "column": "source",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "search_name",
           "column": "search_name",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "email_verified_date",
           "column": "email_verified_date",
-          "airtable_type": "date",
+          "source_type": "date",
           "pg_type": "date",
           "kind": "date"
         },
         {
           "field": "email_sub_status",
           "column": "email_sub_status",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         }
@@ -565,147 +565,147 @@
         {
           "field": "full_name",
           "column": "full_name",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "first_name",
           "column": "first_name",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "last_name",
           "column": "last_name",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "title",
           "column": "title",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "email",
           "column": "email",
-          "airtable_type": "email",
+          "source_type": "email",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "email_status",
           "column": "email_status",
-          "airtable_type": "singleSelect",
+          "source_type": "singleSelect",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "company",
           "column": "company",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "domain",
           "column": "domain",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "website",
           "column": "website",
-          "airtable_type": "url",
+          "source_type": "url",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "employees",
           "column": "employees",
-          "airtable_type": "number",
+          "source_type": "number",
           "pg_type": "bigint",
           "kind": "integer"
         },
         {
           "field": "industry",
           "column": "industry",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "linkedin_url",
           "column": "linkedin_url",
-          "airtable_type": "url",
+          "source_type": "url",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "city",
           "column": "city",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "state",
           "column": "state",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "country",
           "column": "country",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "seniority",
           "column": "seniority",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "departments",
           "column": "departments",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "apollo_person_id",
           "column": "apollo_person_id",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "apollo_org_id",
           "column": "apollo_org_id",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "source",
           "column": "source",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "search_name",
           "column": "search_name",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         }
@@ -724,147 +724,147 @@
         {
           "field": "full_name",
           "column": "full_name",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "first_name",
           "column": "first_name",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "last_name",
           "column": "last_name",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "title",
           "column": "title",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "email",
           "column": "email",
-          "airtable_type": "email",
+          "source_type": "email",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "email_status",
           "column": "email_status",
-          "airtable_type": "singleSelect",
+          "source_type": "singleSelect",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "company",
           "column": "company",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "domain",
           "column": "domain",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "website",
           "column": "website",
-          "airtable_type": "url",
+          "source_type": "url",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "employees",
           "column": "employees",
-          "airtable_type": "number",
+          "source_type": "number",
           "pg_type": "bigint",
           "kind": "integer"
         },
         {
           "field": "industry",
           "column": "industry",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "linkedin_url",
           "column": "linkedin_url",
-          "airtable_type": "url",
+          "source_type": "url",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "city",
           "column": "city",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "state",
           "column": "state",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "country",
           "column": "country",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "seniority",
           "column": "seniority",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "departments",
           "column": "departments",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "apollo_person_id",
           "column": "apollo_person_id",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "apollo_org_id",
           "column": "apollo_org_id",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "source",
           "column": "source",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "search_name",
           "column": "search_name",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         }
@@ -883,147 +883,147 @@
         {
           "field": "full_name",
           "column": "full_name",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "first_name",
           "column": "first_name",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "last_name",
           "column": "last_name",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "title",
           "column": "title",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "email",
           "column": "email",
-          "airtable_type": "email",
+          "source_type": "email",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "email_status",
           "column": "email_status",
-          "airtable_type": "singleSelect",
+          "source_type": "singleSelect",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "company",
           "column": "company",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "domain",
           "column": "domain",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "website",
           "column": "website",
-          "airtable_type": "url",
+          "source_type": "url",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "employees",
           "column": "employees",
-          "airtable_type": "number",
+          "source_type": "number",
           "pg_type": "bigint",
           "kind": "integer"
         },
         {
           "field": "industry",
           "column": "industry",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "linkedin_url",
           "column": "linkedin_url",
-          "airtable_type": "url",
+          "source_type": "url",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "city",
           "column": "city",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "state",
           "column": "state",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "country",
           "column": "country",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "seniority",
           "column": "seniority",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "departments",
           "column": "departments",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "apollo_person_id",
           "column": "apollo_person_id",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "apollo_org_id",
           "column": "apollo_org_id",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "source",
           "column": "source",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "search_name",
           "column": "search_name",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         }
@@ -1042,147 +1042,147 @@
         {
           "field": "full_name",
           "column": "full_name",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "first_name",
           "column": "first_name",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "last_name",
           "column": "last_name",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "title",
           "column": "title",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "email",
           "column": "email",
-          "airtable_type": "email",
+          "source_type": "email",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "email_status",
           "column": "email_status",
-          "airtable_type": "singleSelect",
+          "source_type": "singleSelect",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "company",
           "column": "company",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "domain",
           "column": "domain",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "website",
           "column": "website",
-          "airtable_type": "url",
+          "source_type": "url",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "employees",
           "column": "employees",
-          "airtable_type": "number",
+          "source_type": "number",
           "pg_type": "bigint",
           "kind": "integer"
         },
         {
           "field": "industry",
           "column": "industry",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "linkedin_url",
           "column": "linkedin_url",
-          "airtable_type": "url",
+          "source_type": "url",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "city",
           "column": "city",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "state",
           "column": "state",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "country",
           "column": "country",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "seniority",
           "column": "seniority",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "departments",
           "column": "departments",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "apollo_person_id",
           "column": "apollo_person_id",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "apollo_org_id",
           "column": "apollo_org_id",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "source",
           "column": "source",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "search_name",
           "column": "search_name",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         }
@@ -1201,147 +1201,147 @@
         {
           "field": "full_name",
           "column": "full_name",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "first_name",
           "column": "first_name",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "last_name",
           "column": "last_name",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "title",
           "column": "title",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "email",
           "column": "email",
-          "airtable_type": "email",
+          "source_type": "email",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "email_status",
           "column": "email_status",
-          "airtable_type": "singleSelect",
+          "source_type": "singleSelect",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "company",
           "column": "company",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "domain",
           "column": "domain",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "website",
           "column": "website",
-          "airtable_type": "url",
+          "source_type": "url",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "employees",
           "column": "employees",
-          "airtable_type": "number",
+          "source_type": "number",
           "pg_type": "bigint",
           "kind": "integer"
         },
         {
           "field": "industry",
           "column": "industry",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "linkedin_url",
           "column": "linkedin_url",
-          "airtable_type": "url",
+          "source_type": "url",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "city",
           "column": "city",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "state",
           "column": "state",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "country",
           "column": "country",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "seniority",
           "column": "seniority",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "departments",
           "column": "departments",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "apollo_person_id",
           "column": "apollo_person_id",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "apollo_org_id",
           "column": "apollo_org_id",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "source",
           "column": "source",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         },
         {
           "field": "search_name",
           "column": "search_name",
-          "airtable_type": "singleLineText",
+          "source_type": "singleLineText",
           "pg_type": "text",
           "kind": "text"
         }

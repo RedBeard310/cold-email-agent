@@ -32,7 +32,7 @@ When future niches come online they'll follow the same pattern with their own pr
 
 ## 3. Marketing agencies niche — next steps (pick up here)
 
-**Where it stands (2026-07-01):** The `marketing_agencies` niche's leads are DONE and loaded. 11,580 Apollo leads (from the "Marketing Agencies 1" saved search — small agencies, 1–20 employees, US/CA/AU/UK, owner/founder/CEO/managing-partner, verified emails) lived in Airtable base `appGzk9z2io4dPJUB` ("Marketing Agency Leads", table "Leads"). Since 2026-09-13 they live in Postgres as **`niche_leads.marketing_agencies`**. Built via the new `src/apollo/` tooling; ~11,580 credits spent. See memory `marketing-agencies-leads` for full detail.
+**Where it stands (2026-07-01):** The `marketing_agencies` niche's leads are DONE and loaded. 11,580 Apollo leads (from the "Marketing Agencies 1" saved search — small agencies, 1–20 employees, US/CA/AU/UK, owner/founder/CEO/managing-partner, verified emails) lived in old base `appGzk9z2io4dPJUB` ("Marketing Agency Leads", table "Leads"). Since 2026-09-13 they live in Postgres as **`niche_leads.marketing_agencies`**. Built via the new `src/apollo/` tooling; ~11,580 credits spent. See memory `marketing-agencies-leads` for full detail.
 
 **Next steps (not started — resume next session):**
 

@@ -4,9 +4,9 @@
 > mapping, and per-campaign mechanics are worked out as the project is built. This document
 > defines *what the project is and how it's shaped* — not the exact email flow.
 
-> **Storage update, 2026-09-13.** Leads no longer live in Airtable, and the Airtable account is
+> **Storage update, 2026-09-13.** Leads no longer live in the old database, and the old database account is
 > canceled. They're in Postgres: one table per niche in the `niche_leads` schema of the `pipeline`
-> database, with the raw Airtable export kept in `archive.airtable_records`. The lines below that
+> database, with the raw the old database export kept in `archive.legacy_export_records`. The lines below that
 > say where leads live, and how they're reached, now describe Postgres. The rest is the original spec.
 
 ---
@@ -79,7 +79,7 @@ The first and currently only fully-defined niche.
 - **Offer / angle:** sell them on **starting / using YouTube** to attract clients (Content Gets
   Clients' core offer). The angle is "you should be on YouTube," *not* "you already have YouTube."
 - **Lead source:** Postgres table **`niche_leads.financial_advisors`**, holding **4,565 verified
-  leads** produced by `finance-lead-finder`. They were copied from Airtable base `appvEVgfYvyNIms2h`
+  leads** produced by `finance-lead-finder`. They were copied from old base `appvEVgfYvyNIms2h`
   on 2026-09-13.
 - **Fields available on each lead** (for personalization / segmentation):
   `legal_name`, `primary_name`, `owner_first_name`, `owner_last_name`, `email`,

@@ -23,7 +23,7 @@ The entire design rests on **niche-agnostic core, niche-specific config** (SPEC.
 
 ## First niche: `financial_advisors`
 
-The only fully-defined niche (SPEC.md §4). Audience: independent state-registered RIAs who **do not** have a YouTube channel. The offer is "you should *start* using YouTube to get clients" — **not** "you already have YouTube." Lead source: **`niche_leads.financial_advisors`** in Postgres (~4,565 verified leads, copied out of Airtable base `appvEVgfYvyNIms2h` on 2026-09-13). Lead fields and suggested segmentation levers (by `tag`, e.g. `retirement_income`; by `email_origin`, `scraped` before `constructed`) are in SPEC.md §4.
+The only fully-defined niche (SPEC.md §4). Audience: independent state-registered RIAs who **do not** have a YouTube channel. The offer is "you should *start* using YouTube to get clients" — **not** "you already have YouTube." Lead source: **`niche_leads.financial_advisors`** in Postgres (~4,565 verified leads, copied out of old base `appvEVgfYvyNIms2h` on 2026-09-13). Lead fields and suggested segmentation levers (by `tag`, e.g. `retirement_income`; by `email_origin`, `scraped` before `constructed`) are in SPEC.md §4.
 
 ## Integration points (the whole job lives at these two boundaries)
 
@@ -31,12 +31,12 @@ The only fully-defined niche (SPEC.md §4). Audience: independent state-register
 finance-lead-finder ──► Postgres (niche_leads.<table>) ──► THIS AGENT ──► SmartLead (campaigns/sending)
 ```
 
-- **Upstream:** [finance-lead-finder](../finance-lead-finder/) built the financial-advisor lead list, which now lives in `niche_leads.financial_advisors`. That repo's own move off Airtable is tracked separately. Each future niche gets its own upstream repo and its own lead table, created by a SQL file in [migrations/](migrations/).
+- **Upstream:** [finance-lead-finder](../finance-lead-finder/) built the financial-advisor lead list, which now lives in `niche_leads.financial_advisors`. That repo's own move off the old database is tracked separately. Each future niche gets its own upstream repo and its own lead table, created by a SQL file in [migrations/](migrations/).
 - **Downstream:** the existing SmartLead account, inboxes, and warmup — no new account.
 
 ## Where the leads live (Postgres, since 2026-09-13)
 
-The leads used to sit in seven Airtable bases. On 2026-09-13 they were exported and loaded into the `pipeline` Postgres database, the same database the YouTube pipeline uses. Airtable is canceled, and no code here calls it.
+The leads used to sit in seven old bases. On 2026-09-13 they were exported and loaded into the `pipeline` Postgres database, the same database the YouTube pipeline uses. The old database is canceled, and no code here calls it.
 
 | Table | Rows loaded 2026-09-13 | What's in it |
 |---|---|---|
@@ -49,11 +49,11 @@ The leads used to sit in seven Airtable bases. On 2026-09-13 they were exported 
 | `niche_leads.management_consulting` | 2,539 | Consulti leads |
 | `niche_leads.staffing_recruiting` | 2,411 | Consulti leads |
 
-- **Raw copy.** Every exported Airtable table is stored exactly as exported in `archive.airtable_records`, with one row per table in `archive.airtable_tables`. It's history, so don't write to it. `scripts/load-airtable-export.ts` did the one-time load and `scripts/verify-airtable-load.ts` checks it against the export files. Neither calls Airtable.
+- **Raw copy.** Every exported old table is stored exactly as exported in `archive.legacy_export_records`, with one row per table in `archive.legacy_export_tables`. It's history, so don't write to it. `scripts/load-legacy-export.ts` did the one-time load and `scripts/verify-legacy-load.ts` checks it against the export files. Neither reaches any outside service.
 - **Record ids** keep their old `rec...` format as primary keys, so anything that saved an id still finds its row.
 - **Code.** [src/engine/db.ts](src/engine/db.ts) is the only CLI code that reads or writes these tables. It accepts only the eight tables above, checks column names against the database, binds every value as a parameter, and runs each write in one transaction.
 - **Schema changes** are SQL files in [migrations/](migrations/). No command creates tables or columns.
-- **Renamed commands.** `apollo:to-airtable` is now `apollo:to-db`, `consulti:to-airtable` is now `consulti:to-db`, and `--no-airtable` is now `--no-dedupe`. The old names still work and print a one-line notice. Choose a table with `--table niche_leads.<name>`. The old `--base` flag is refused.
+- **Renamed commands.** The lead commands are `apollo:to-db` and `consulti:to-db`, and the dedupe switch is `--no-dedupe`. The pre-Postgres names were removed on 2026-09-29. Choose a table with `--table niche_leads.<name>`. The old `--base` flag is refused.
 - **`apollo:to-db` and `consulti:to-db` need `--table`.** Neither has a default, because both write to live leads. A CSV row that matches a lead already in the table updates that lead, and three things stay as they are:
   - **Checked emails.** A lead with an `email_verified_date` keeps its `email` and `email_status`. Both verify commands skip any lead that has that date, so an overwritten status would never come back, and the lead would stay off the send list.
   - **Labels.** `consulti:to-db` never writes `email_status`, `source` or `search_name` on a matched lead. `apollo:to-db` leaves them alone on a lead from another source, such as a Consulti lead matched by email.

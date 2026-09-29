@@ -2,7 +2,7 @@
 -- 0001 copied each Airtable table's fields exactly. The code moving off the Airtable API needs two
 -- more things, and this file adds them.
 -- Apply once, after 0001: psql -v ON_ERROR_STOP=1 -f migrations/0002_niche_leads_email_keys_verify_columns.sql
--- Section 4 of scripts/verify-airtable-load.ts checks both changes.
+-- Section 4 of scripts/verify-legacy-load.ts checks both changes.
 BEGIN;
 
 -- 1. A unique email index on the 7 tables the Consulti loader writes to.
