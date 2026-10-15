@@ -161,23 +161,24 @@ Fallback (ONLY if the canonical file is unreachable): zero em dashes; level-2 dr
 **Limitation:** this governs chat-initiated work. Headless automation that is already running doesn't re-read this file mid-run; the rule applies at the moment a session starts, modifies, restarts, or triggers that automation.
 <!-- /LLM-SPEND-GUARD -->
 
-<!-- SUBSCRIPTION-NOT-API v1 — managed block; keep identical in every repo -->
-## Subscription, not API (house law — wired 2026-08-05)
+<!-- SUBSCRIPTION-NOT-API v2 — managed block; keep identical in every repo -->
+## Subscription, not API (house law — wired 2026-08-05, tightened 2026-10-14)
 
-**Headless `claude -p` in automation bills Casey's Max subscription. It must never bill the Anthropic API.**
+**Every LLM call in every repo runs on Casey's Claude Max subscription, through the Claude Code CLI. Nothing automated runs on OpenRouter. Nothing ever bills the Anthropic API.**
 
-Claude Code *prefers* `ANTHROPIC_API_KEY` over the subscription login whenever that variable is in its environment. So any script that loads the shared env and then spawns `claude` silently moves its spend off the already-paid plan onto metered credit. That leak ran **~$10–16/day** through 2026-08-03/04. The 2026-08-01 attempt to fix it failed because it patched only interactive shells (`~/.bashrc`) and three shell scripts, and missed seven copy-pasted `load_env()` functions — which is why the fix now lives *below* the scripts.
+Casey, 2026-10-14: "Move everything over to the Claude subscription. Nothing on OpenRouter. Absolutely zero automated tasks run on OpenRouter. [...] It should be clearly noted that we never prefer OpenRouter when we can use the Claude subscription instead. We only use OpenRouter when it's absolutely 100% necessary."
 
-**Three layers. Do not remove any of them:**
+**Where a call goes:**
+
+- **Everything → the Claude Code CLI.** Judgment, writing, tool use, and the mechanical work too: classification, extraction, tagging, scoring, summaries. A bare id (`sonnet`, `opus`, `haiku`) in `models.json` shells out to `claude -p` on the Max plan at $0 marginal. For a prompt-in, text-out job pass `--tools ""`, `--no-session-persistence` and `--output-format json`, and run it from an empty directory so no CLAUDE.md rides into the prompt. Do not pass `--bare`: it skips credential loading and reports "Not logged in" on the VPS.
+- **OpenRouter only when the CLI cannot do the job at all**, and only after Casey has said so for that named task. Record his words in the repo's `models.json` under a `$why` key. Rate limits, cost, speed and convenience are reasons to tell Casey, never reasons to route around him. Until 2026-10-14 high-volume classification went to OpenRouter to protect the Max rate limit. Casey ended that rule himself; a burst that slows his own sessions is a trade he has accepted.
+- **The Anthropic API: never.** Do not move work onto a paid API to "save money". That costs more, not less.
+
+**Why the API is unreachable from the VPS.** Claude Code prefers `ANTHROPIC_API_KEY` over the subscription login whenever that variable is in its environment. So any script that loads the shared env and then spawns `claude` silently moves its spend off the already-paid plan onto metered credit. That leak ran **~$10–16/day** through 2026-08-03/04. The 2026-08-01 attempt to fix it failed because it patched only interactive shells (`~/.bashrc`) and three shell scripts, and missed seven copy-pasted `load_env()` functions, which is why the fix now lives *below* the scripts. Three layers, do not remove any of them:
 
 1. **`ANTHROPIC_API_KEY` is stripped at the env-storage sync boundary** (`sync-to-vps.sh`, `MAC_ONLY`), so the key does not exist on the VPS at all. Automations that don't exist yet inherit the fix.
 2. **`/usr/bin/claude` on the VPS is a shim** that unsets the key and execs the real binary. It sits at `/usr/bin/claude` rather than `/usr/local/bin` because some scripts hard-code that path. `claude-shim-guard.timer` re-asserts it every 15 min, because `npm update -g` restores the original symlink.
 3. **This rule**, so no future script re-opens it.
-
-**Choosing where a new LLM call goes:**
-
-- **Judgment, tool use, writing → the Claude Code CLI.** It is free on the plan. Do not move work onto a paid API to "save money" — that costs more, not less.
-- **High-volume mechanical work (classification, extraction, tagging) → OpenRouter.** Not for cost; for **rate limits**. A burst of CLI agents draws on the same Max limit as Casey's own interactive sessions. Route it with an `openrouter:` prefix in `models.json`.
 
 **Ops footgun:** never `cp` a file over `/usr/bin/claude` without `rm`-ing it first. It may be a symlink, and `cp` writes straight through it and destroys the ~275MB real binary. Recovery is `sudo npm install -g @anthropic-ai/claude-code@<version>`.
 <!-- /SUBSCRIPTION-NOT-API -->
@@ -189,7 +190,7 @@ Claude Code *prefers* `ANTHROPIC_API_KEY` over the subscription login whenever t
 - Mac: `~/Claude/casey-assistant/brain/infrastructure/model-policy.md`
 - VPS: `/home/casey/repos/casey-assistant/brain/infrastructure/model-policy.md`
 
-House default for research / mining / synthesis work is `openrouter:deepseek/deepseek-v3.2`. Model ids are configuration and are committed; API keys stay in the shared env. Env-based model selection is banned — the Mac clobbers the VPS env file every ~2 minutes, which silently reverted a swap and burned ~$22 of unplanned Sonnet on 2026-07-31.
+House default for every task, research and mining and synthesis included, is the Claude Code CLI on Casey's Max subscription: a bare id such as `sonnet` in `models.json` (Casey, 2026-10-14; it was OpenRouter DeepSeek from 2026-08-01 until then). An `openrouter:` id is an exception that needs his word, see the Subscription block. Model ids are configuration and are committed; API keys stay in the shared env. Env-based model selection is banned — the Mac clobbers the VPS env file every ~2 minutes, which silently reverted a swap and burned ~$22 of unplanned Sonnet on 2026-07-31.
 
 To change a model: edit `models.json` and commit. Do not hard-code a model id in any module.
 
